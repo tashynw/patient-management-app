@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
+    "bcrypt": "^5.1.0",
     "dayjs": "^1.11.6",
     "dotenv": "^16.0.3",
     "eslint": "8.27.0",

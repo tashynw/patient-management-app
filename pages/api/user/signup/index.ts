@@ -3,6 +3,7 @@ import dbConnect from "../../../../utils/dbConnect";
 import { v4 as uuidv4 } from "uuid";
 import User from "../../../../models/User";
 import { UserType } from "../../../../types";
+import { hash } from "bcrypt"
 
 type Data = {
   name?: string;
@@ -40,7 +41,7 @@ export default async function handler(
   const userId: string = uuidv4();
 
   //hash password
-  const hashedPassword: string = "testval";
+  const hashedPassword: string = await hash(password,10);;
   try {
     await User.create({
       userId,
