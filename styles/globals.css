@@ -2,25 +2,80 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  background-color: #FAFAFA;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.intro-banner{
+  width: 450px;
+  height: 350px;
 }
 
-* {
-  box-sizing: border-box;
+.intro-banner h1{
+  font-size: 58px;
+  font-weight: 1000;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+@media screen and (max-width: 1000px){
+  .intro-banner{
+    display: none;
   }
-  body {
-    color: white;
-    background: black;
-  }
+}
+
+.appointment-card{
+  width: 303px;
+  height: 330px;
+  background-color: #6beb34;
+  margin: 10px;
+  border-radius: 10px;
+  padding-left: 0;
+  margin-bottom: 50px;
+}
+
+.appointment-card .card-header{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  height: 132px;
+  width: 303px;
+  background: #23A6F0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.appointment-card .card-header p{
+  font-size: 20px;
+  color: white;
+}
+
+.appointment-card .card-header .icon-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 72px;
+  width: 72px;
+  background: white;
+  border-radius: 50%;
+}
+
+.appointment-card .card-description{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  height: 200px;
+  width: 303px;
+  background: white;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  padding-top: 10%;
+}
+
+.appointment-card .card-description p{
+  height: 20px;
+}
+
+.appointment-card .card-description .description-text{
+  height: 60px;
 }
