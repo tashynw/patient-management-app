@@ -74,8 +74,8 @@ export default function SignUpPage() {
             </button>
           </div>
 
-          <div className="w-20 p-5 bg-white rounded-3">
-            <h1 className="text-center">Sign Up</h1>
+          <div className="w-20 p-4 bg-white rounded-3">
+            <h4 className="text-center">Sign Up</h4>
             <br />
             <form onSubmit={handleSignUpForm}>
               <div className="form-group">
