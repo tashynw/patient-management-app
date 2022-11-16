@@ -57,8 +57,8 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <div className="w-30 p-5 bg-white rounded-3">
-              <h1 className="text-center">Login</h1>
+            <div className="w-30 p-4 bg-white rounded-3">
+              <h4 className="text-center">Login</h4>
               <br />
               <form onSubmit={handleLoginForm}>
                 <div className="form-group">

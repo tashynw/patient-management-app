@@ -1,7 +1,9 @@
 import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { Container, Nav, Navbar } from "react-bootstrap";
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
 
 const NavBar = () => {
   const router = useRouter();
@@ -22,15 +24,16 @@ const NavBar = () => {
   }, []);
 
   return (
-    <Navbar bg="dark" variant="dark">
+    <Navbar  bg="dark" variant="dark" expand="md">
       <Container>
         <Navbar.Brand onClick={() => router.push("/")}>
           Appointment App
         </Navbar.Brand>
 
-        <Navbar.Toggle />
+        <Navbar.Toggle aria-controls="navbar-links" />
 
-        <Navbar.Collapse className="justify-content-end">
+        <Navbar.Collapse className="justify-content-end" id="navbar-links">
+          <Nav>
           {isLoggedIn ? (
             <>
               <Nav.Link
@@ -61,6 +64,7 @@ const NavBar = () => {
               </Nav.Link>
             </>
           )}
+          </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
