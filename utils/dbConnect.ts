@@ -6,7 +6,7 @@ dotenv.config();
 
 const MONGODB_URI: string = process.env.MONGODB_URI || "";
 
-if (!MONGODB_URI) throw new Error("Set the URI in the environmnt variables!");
+if (!MONGODB_URI) throw new Error("Set the URI in the environment variables!");
 
 const connection: { isConnected?: number } = {};
 

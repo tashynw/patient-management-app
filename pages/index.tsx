@@ -1,6 +1,8 @@
 import NavBar from "../components/navbar";
 import { BsSun } from "react-icons/bs";
 import Cards from "../components/cards";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 export default function Home() {
   return (
@@ -23,4 +25,23 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps(context: any) {
+  const session = await unstable_getServerSession(context.req,context.res,authOptions);
+
+  if(!session){
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      }
+    }
+  }
+  
+  return {
+    props: {
+      session: JSON.parse(JSON.stringify(session)) 
+    },
+  }
 }

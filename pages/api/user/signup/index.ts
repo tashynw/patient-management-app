@@ -20,9 +20,7 @@ export default async function handler(
     email,
     password,
     role,
-    age,
-    phoneNumber,
-    address,
+    ipAddress
   }: UserType = req.body;
   if (
     !firstName ||
@@ -30,9 +28,7 @@ export default async function handler(
     !email ||
     !password ||
     !role ||
-    !age ||
-    !phoneNumber ||
-    !address
+    !ipAddress
   )
     return res.status(400).json({ message: "Invalid request body" });
 
@@ -50,13 +46,14 @@ export default async function handler(
       email,
       password: hashedPassword,
       role,
-      age,
-      phoneNumber,
-      address,
+      ipAddress,
+      age: 0,
+      phoneNumber: "",
+      address: "",
     });
     res.status(200).json({ message: "User successfully created" });
   } catch (e) {
-    console.log(`Create User Error: ${e}`);
+    console.error(`Create User Error: ${e}`);
     res.status(400).json({ message: "Error creating User" });
   }
 }

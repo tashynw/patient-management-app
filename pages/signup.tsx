@@ -1,7 +1,48 @@
-import React from "react";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import React, { useState } from "react";
 import NavBar from "../components/navbar";
+import { createUser } from "../utils/apiService";
+import { useRouter } from 'next/router'
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
 
-const SignUpPage = () => {
+export default function SignUpPage(){
+  const router = useRouter()
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
+  const [matchPasswordRegex, setMatchPasswordRegex] = useState<boolean>(true);
+  const [signUpFailed, setSignUpFailed] = useState<boolean>(false);
+
+  const getIpAddress = async (): Promise<string> => {
+    const res = await fetch('https://geolocation-db.com/json/')
+    const json = await res.json();
+    return json.IPv4;
+  }
+
+  const handleSignUpForm = async(e: React.FormEvent<HTMLFormElement>) => {
+    try{
+      e.preventDefault();
+      if(password!=confirmPassword) return setPasswordMismatch(true);
+      if(!new RegExp("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(password)) return setMatchPasswordRegex(false);
+      const ipAddress: string = await getIpAddress();
+      await createUser({ firstName, lastName, email, password, ipAddress });
+      const loginStatus = await signIn("credentials", {
+        email,
+        password,
+        redirect: false
+      })
+      if(!loginStatus?.ok) return setSignUpFailed(true);
+      router.push('/');
+    } catch(e){
+      console.log(e)
+    }
+    
+  }
   return (
     <div
       className="bg-image"
@@ -32,65 +73,89 @@ const SignUpPage = () => {
           <div className="w-20 p-5 bg-white rounded-3">
             <h1 className="text-center">Sign Up</h1>
             <br />
-            <div className="form-group">
-              <label>First Name</label>
-              <input
-                type="text"
-                className="form-control mt-2"
-                placeholder="Enter email"
-              />
-            </div>
-            <br />
-            <div className="form-group">
-              <label>Last Name</label>
-              <input
-                type="text"
-                className="form-control mt-2"
-                placeholder="Enter email"
-              />
-            </div>
-            <br />
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                className="form-control mt-2"
-                placeholder="Enter email"
-              />
-            </div>
-            <br />
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                className="form-control mt-2"
-                placeholder="Enter password"
-              />
-            </div>
-            <br />
-            <div className="form-group">
-              <label>Confirm Password</label>
-              <input
-                type="password"
-                className="form-control mt-2"
-                placeholder="Confirm password"
-              />
-            </div>
+            <form onSubmit={handleSignUpForm}>
+              <div className="form-group">
+                <label>First Name</label>
+                <input
+                  type="text"
+                  className="form-control mt-2"
+                  placeholder="Enter First Name"
+                  required
+                  onChange={(e)=>setFirstName(e.target.value)}
+                />
+              </div>
+              <br />
+              <div className="form-group">
+                <label>Last Name</label>
+                <input
+                  type="text"
+                  className="form-control mt-2"
+                  placeholder="Enter Last Name"
+                  required
+                  onChange={(e)=>setLastName(e.target.value)}
+                />
+              </div>
+              <br />
+              <div className="form-group">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  className="form-control mt-2"
+                  placeholder="Enter email"
+                  required
+                  onChange={(e)=>setEmail(e.target.value)}
+                />
+              </div>
+              <br />
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  className={matchPasswordRegex ? "form-control mt-2" : "form-control mt-2 is-invalid"}
+                  placeholder="Enter password"
+                  required
+                  onChange={(e)=>setPassword(e.target.value)}
+                />
+                {!matchPasswordRegex &&
+                  <div className="invalid-feedback">
+                    Minimum of eight characters, at least one letter, number and special character.
+                  </div>
+                }
+              </div>
+              <br />
+              <div className="form-group">
+                <label>Confirm Password</label>
+                <input
+                  type="password"
+                  className={!passwordMismatch ? "form-control mt-2" : "form-control mt-2 is-invalid"}
+                  placeholder="Confirm password"
+                  required
+                  onChange={(e)=>setConfirmPassword(e.target.value)}
+                />
+                {passwordMismatch && 
+                  <div className="invalid-feedback">
+                    The password does not match.
+                  </div>
+                }
+              </div> 
+              <br />
+              <div className="text-center">
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-lg text-white"
+                >
+                  Start Today!
+                </button>
+              </div>
+            </form>
             <br />
             <div className="text-center">
-              <button
-                type="submit"
-                className="btn btn-primary btn-lg"
-                style={{ color: "white" }}
-              >
-                Start Today!
-              </button>
-            </div>
-            <br />
-            <div className="text-center">
-              <p>
+              <Link href="/login" style={{textDecoration:'none', color:'inherit'}}>
                 <strong>Already have an account? Login</strong>
-              </p>
+              </Link>
+              {signUpFailed &&
+                <p className="text-danger text-center">SignUp Failed</p> 
+              }
             </div>
           </div>
         </div>
@@ -99,4 +164,21 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export async function getServerSideProps(context: any) {
+  const session = await unstable_getServerSession(context.req,context.res,authOptions);
+
+  if(session){
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    }
+  }
+  
+  return {
+    props: {
+      session: JSON.parse(JSON.stringify(session)) 
+    },
+  }
+}
