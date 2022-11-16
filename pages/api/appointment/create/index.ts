@@ -16,10 +16,11 @@ export default async function handler(
     doctorId,
     patientId,
     date,
+    time,
     description,
     appointmentStatus,
   }: AppointmentType = req.body;
-  if (!doctorId || !patientId || !date || !description || !appointmentStatus)
+  if (!doctorId || !patientId || !date || !description || !appointmentStatus || !time)
     return res.status(400).json({ message: "Invalid request body" });
 
   await dbConnect();
@@ -33,6 +34,7 @@ export default async function handler(
       patientId,
       date,
       description,
+      time,
       appointmentStatus,
     });
     res.status(200).json({ message: "Appointment successfully created" });

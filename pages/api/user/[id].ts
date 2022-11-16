@@ -19,6 +19,7 @@ export default async function handler(
   try {
     const user: UserType = await User.findOne({ userId: id }).exec();
     if (!user) return res.status(400).json({ message: "User not found" });
+    user.password="";
     return res.status(200).json({ body: user });
   } catch (e) {
     console.log(`Error get user: ${e}`);

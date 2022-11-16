@@ -12,6 +12,7 @@ export type AppointmentType = {
   doctorId: string;
   patientId: string;
   date: string;
+  time: string;
   description: string;
   appointmentStatus: string;
 };
@@ -40,4 +41,23 @@ export type CreateUserInput = {
 export type LoginUserInput = {
   email: string;
   password: string;
+}
+
+export type CreateAppointmentInput = {
+  doctorId: string;
+  patientId: string;
+  date: string;
+  time: string;
+  description: string;
+}
+
+export const AppointmentFetchQueries: { [key: string]: string; } = {
+  PENDING: "Pending",
+  REJECTED: "Rejected",
+  ACCEPTED: "Accepted"
+}
+
+export type FetchAppointmentInput = {
+  patientId: string;
+  appointmentStatus: string;
 }

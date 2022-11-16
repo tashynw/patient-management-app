@@ -19,6 +19,10 @@ const AppointmentSchema: Schema = new Schema({
     type: String,
     required: true,
   },
+  time: {
+    type: String,
+    required: true,
+  },
   //patient enter reason for visit etc..
   description: {
     type: String,

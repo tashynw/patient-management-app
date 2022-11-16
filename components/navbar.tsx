@@ -42,7 +42,7 @@ const NavBar = () => {
               >
                 Home
               </Nav.Link>
-              <Nav.Link className="m-3 text-white">Add Appointment</Nav.Link>
+              <Nav.Link className="m-3 text-white" onClick={()=>router.push('/book')}>Add Appointment</Nav.Link>
               <Nav.Link className="m-3 text-white">View Profile</Nav.Link>
               <Nav.Link className="m-3 text-white" onClick={handleSignOut}>
                 Sign Out

@@ -78,4 +78,6 @@ body {
 
 .appointment-card .card-description .description-text{
   height: 60px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
