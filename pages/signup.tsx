@@ -3,12 +3,12 @@ import Link from "next/link";
 import React, { useState } from "react";
 import NavBar from "../components/navbar";
 import { createUser } from "../utils/apiService";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-export default function SignUpPage(){
-  const router = useRouter()
+export default function SignUpPage() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -19,30 +19,34 @@ export default function SignUpPage(){
   const [signUpFailed, setSignUpFailed] = useState<boolean>(false);
 
   const getIpAddress = async (): Promise<string> => {
-    const res = await fetch('https://geolocation-db.com/json/')
+    const res = await fetch("https://geolocation-db.com/json/");
     const json = await res.json();
     return json.IPv4;
-  }
+  };
 
-  const handleSignUpForm = async(e: React.FormEvent<HTMLFormElement>) => {
-    try{
+  const handleSignUpForm = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
       e.preventDefault();
-      if(password!=confirmPassword) return setPasswordMismatch(true);
-      if(!new RegExp("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(password)) return setMatchPasswordRegex(false);
+      if (password != confirmPassword) return setPasswordMismatch(true);
+      if (
+        !new RegExp("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(
+          password
+        )
+      )
+        return setMatchPasswordRegex(false);
       const ipAddress: string = await getIpAddress();
       await createUser({ firstName, lastName, email, password, ipAddress });
       const loginStatus = await signIn("credentials", {
         email,
         password,
-        redirect: false
-      })
-      if(!loginStatus?.ok) return setSignUpFailed(true);
-      router.push('/');
-    } catch(e){
-      console.log(e)
+        redirect: false,
+      });
+      if (!loginStatus?.ok) return setSignUpFailed(true);
+      router.push("/");
+    } catch (e) {
+      console.log(e);
     }
-    
-  }
+  };
   return (
     <div
       className="bg-image"
@@ -81,7 +85,7 @@ export default function SignUpPage(){
                   className="form-control mt-2"
                   placeholder="Enter First Name"
                   required
-                  onChange={(e)=>setFirstName(e.target.value)}
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
               </div>
               <br />
@@ -92,7 +96,7 @@ export default function SignUpPage(){
                   className="form-control mt-2"
                   placeholder="Enter Last Name"
                   required
-                  onChange={(e)=>setLastName(e.target.value)}
+                  onChange={(e) => setLastName(e.target.value)}
                 />
               </div>
               <br />
@@ -103,7 +107,7 @@ export default function SignUpPage(){
                   className="form-control mt-2"
                   placeholder="Enter email"
                   required
-                  onChange={(e)=>setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <br />
@@ -111,33 +115,42 @@ export default function SignUpPage(){
                 <label>Password</label>
                 <input
                   type="password"
-                  className={matchPasswordRegex ? "form-control mt-2" : "form-control mt-2 is-invalid"}
+                  className={
+                    matchPasswordRegex
+                      ? "form-control mt-2"
+                      : "form-control mt-2 is-invalid"
+                  }
                   placeholder="Enter password"
                   required
-                  onChange={(e)=>setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-                {!matchPasswordRegex &&
+                {!matchPasswordRegex && (
                   <div className="invalid-feedback">
-                    Minimum of eight characters, at least one letter, number and special character.
+                    Minimum of eight characters, at least one letter, number and
+                    special character.
                   </div>
-                }
+                )}
               </div>
               <br />
               <div className="form-group">
                 <label>Confirm Password</label>
                 <input
                   type="password"
-                  className={!passwordMismatch ? "form-control mt-2" : "form-control mt-2 is-invalid"}
+                  className={
+                    !passwordMismatch
+                      ? "form-control mt-2"
+                      : "form-control mt-2 is-invalid"
+                  }
                   placeholder="Confirm password"
                   required
-                  onChange={(e)=>setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                {passwordMismatch && 
+                {passwordMismatch && (
                   <div className="invalid-feedback">
                     The password does not match.
                   </div>
-                }
-              </div> 
+                )}
+              </div>
               <br />
               <div className="text-center">
                 <button
@@ -150,35 +163,42 @@ export default function SignUpPage(){
             </form>
             <br />
             <div className="text-center">
-              <Link href="/login" style={{textDecoration:'none', color:'inherit'}}>
+              <Link
+                href="/login"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
                 <strong>Already have an account? Login</strong>
               </Link>
-              {signUpFailed &&
-                <p className="text-danger text-center">SignUp Failed</p> 
-              }
+              {signUpFailed && (
+                <p className="text-danger text-center">SignUp Failed</p>
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(context.req,context.res,authOptions);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
-  if(session){
+  if (session) {
     return {
       redirect: {
-        destination: '/',
+        destination: "/",
         permanent: false,
-      }
-    }
+      },
+    };
   }
-  
+
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)) 
+      session: JSON.parse(JSON.stringify(session)),
     },
-  }
+  };
 }

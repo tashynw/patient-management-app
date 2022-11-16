@@ -6,21 +6,21 @@ import React, { useState } from "react";
 import NavBar from "../components/navbar";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-export default function LoginPage(){
-  const router = useRouter()
-  const [email,setEmail] = useState<string>("");
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loginFailed, setLoginFailed] = useState<boolean>(false);
 
-  async function handleLoginForm(e: React.FormEvent<HTMLFormElement>){
+  async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const loginStatus = await signIn("credentials", {
       email,
       password,
       redirect: false,
-    })
-    if(!loginStatus?.ok) return setLoginFailed(true);
-    router.push('/')
+    });
+    if (!loginStatus?.ok) return setLoginFailed(true);
+    router.push("/");
   }
 
   return (
@@ -68,7 +68,7 @@ export default function LoginPage(){
                     className="form-control mt-2"
                     placeholder="Enter email"
                     required
-                    onChange={(e)=>setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <br />
@@ -79,7 +79,7 @@ export default function LoginPage(){
                     className="form-control mt-2"
                     placeholder="Enter password"
                     required
-                    onChange={(e)=>setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
                 <br />
@@ -94,36 +94,43 @@ export default function LoginPage(){
               </form>
               <br />
               <div className="text-center">
-                <Link href="/signup" style={{textDecoration:'none', color:'inherit'}}>
+                <Link
+                  href="/signup"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
                   <strong>Don't have an account? Sign Up</strong>
                 </Link>
-                {loginFailed &&
-                  <p className="text-danger text-center">Login Failed</p> 
-                }
-              </div>   
+                {loginFailed && (
+                  <p className="text-danger text-center">Login Failed</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </>
   );
-};
+}
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(context.req,context.res,authOptions);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
-  if(session){
+  if (session) {
     return {
       redirect: {
-        destination: '/',
+        destination: "/",
         permanent: false,
-      }
-    }
+      },
+    };
   }
-  
+
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)) 
+      session: JSON.parse(JSON.stringify(session)),
     },
-  }
+  };
 }
