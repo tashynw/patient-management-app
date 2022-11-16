@@ -23,7 +23,21 @@ export type UserType = {
   email: string;
   password: string;
   role: string;
+  ipAddress: string;
   age?: number;
   phoneNumber?: string;
   address?: string;
 };
+
+export type CreateUserInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  ipAddress: string;
+}
+
+export type LoginUserInput = {
+  email: string;
+  password: string;
+}

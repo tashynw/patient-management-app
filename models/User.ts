@@ -28,6 +28,10 @@ const UserSchema: Schema = new Schema({
     required: true,
     default: "Patient",
   },
+  ipAddress: {
+    type: String,
+    required: true
+  },
   age: {
     type: Number,
   },

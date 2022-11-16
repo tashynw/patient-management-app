@@ -1,8 +1,28 @@
-import Image from "next/image";
-import React from "react";
+import { unstable_getServerSession } from "next-auth";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
 import NavBar from "../components/navbar";
+import { authOptions } from "./api/auth/[...nextauth]";
 
-const LoginPage = () => {
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loginFailed, setLoginFailed] = useState<boolean>(false);
+
+  async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const loginStatus = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    if (!loginStatus?.ok) return setLoginFailed(true);
+    router.push("/");
+  }
+
   return (
     <>
       <div
@@ -32,45 +52,57 @@ const LoginPage = () => {
                 field.
               </h4>
               <br />
-              <button className="btn btn-primary btn-lg text-white">
-                Set appointment today
+              <button className="btn btn-primary btn-lg text-white rounded-5">
+                Set Appointment today
               </button>
             </div>
 
             <div className="w-30 p-5 bg-white rounded-3">
               <h1 className="text-center">Login</h1>
               <br />
-              <div className="form-group">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  className="form-control mt-2"
-                  placeholder="Enter email"
-                />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  className="form-control mt-2"
-                  placeholder="Enter password"
-                />
-              </div>
+              <form onSubmit={handleLoginForm}>
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input
+                    type="email"
+                    className="form-control mt-2"
+                    placeholder="Enter email"
+                    required
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <br />
+                <div className="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    className="form-control mt-2"
+                    placeholder="Enter password"
+                    required
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <br />
+                <div className="text-center">
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-lg text-white"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
               <br />
               <div className="text-center">
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-lg text-white"
+                <Link
+                  href="/signup"
+                  style={{ textDecoration: "none", color: "inherit" }}
                 >
-                  Submit
-                </button>
-              </div>
-              <br />
-              <div className="text-center">
-                <p>
                   <strong>Don't have an account? Sign Up</strong>
-                </p>
+                </Link>
+                {loginFailed && (
+                  <p className="text-danger text-center">Login Failed</p>
+                )}
               </div>
             </div>
           </div>
@@ -78,6 +110,27 @@ const LoginPage = () => {
       </div>
     </>
   );
-};
+}
 
-export default LoginPage;
+export async function getServerSideProps(context: any) {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      session: JSON.parse(JSON.stringify(session)),
+    },
+  };
+}
