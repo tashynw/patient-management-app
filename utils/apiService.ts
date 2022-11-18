@@ -115,6 +115,27 @@ export async function getAcceptedAppointments(
   }
 }
 
+export async function getRejectedAppointments(
+  patientId: string
+): Promise<AppointmentType[]> {
+  try {
+    const requestBody = { patientId, query: "REJECTED" };
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/appointment/fetch`,
+      {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const appointments = await request.json();
+    return appointments.body;
+  } catch (e) {
+    console.error(`Error getRejectedAppointments() ${e}`);
+    throw new Error(`Error in getRejectedAppointments()`);
+  }
+}
+
 export async function getAllAppointments(
   patientId: string
 ): Promise<AppointmentType[]> {
@@ -149,5 +170,50 @@ export async function getAllDoctors(): Promise<UserType[]> {
   } catch (e) {
     console.error(`Error getAllDoctors() ${e}`);
     throw new Error(`Error in getAllDoctors()`);
+  }
+}
+
+export async function updateUser(userId: string,age: number, phoneNumber: string, address: string): Promise<boolean>{
+  try {
+    const requestBody = { age, phoneNumber, address };
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/user/edit/${userId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return request.ok;
+  } catch (e) {
+    console.error(`Error updateUser() ${e}`);
+    throw new Error(`Error in updateUser()`);
+  }
+}
+
+export async function deleteUser(userId: string): Promise<boolean>{
+  try {
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/user/delete/${userId}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    const appointments: AppointmentType[] = await getAllAppointments(userId);
+    for(let appointment of appointments){
+      await fetch(
+        `${HOST_NAME}/api/appointment/delete/${appointment?.appointmentId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+    return request.ok;
+  } catch (e) {
+    console.error(`Error deleteUser() ${e}`);
+    throw new Error(`Error in deleteUser()`);
   }
 }
