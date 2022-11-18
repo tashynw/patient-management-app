@@ -4,24 +4,20 @@ import React, { useEffect, useState } from "react";
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import { UserType } from "../types";
 
-const NavBar = () => {
+interface NavbarProps {
+  pageSession: UserType;
+}
+
+const NavBar = (props: NavbarProps) => {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  async function checkLogin() {
-    const user = await getSession();
-    if (user) setIsLoggedIn(true);
-  }
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(props?.pageSession ? true : false);
 
   async function handleSignOut() {
     await signOut({ redirect: false });
     router.push("/login");
   }
-
-  useEffect(() => {
-    checkLogin();
-  }, []);
 
   return (
     <Navbar  bg="dark" variant="dark" expand="md">

@@ -2,30 +2,27 @@ import NavBar from "../components/navbar";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { useRouter } from "next/router";
-import { getSession } from "next-auth/react";
-import { useEffect, useState } from "react";
 import CardsContainer from "../components/cards-container";
+import { getAcceptedAppointments, getPendingAppointments, getRejectedAppointments, getUser } from "../utils/apiService";
+import { AppointmentType, UserType } from "../types";
 
-export default function Home() {
+interface HomePageProps {
+  acceptedCards: AppointmentType[];
+  pendingCards: AppointmentType[];
+  rejectedCards: AppointmentType[];
+  pageSession: UserType;
+}
+
+export default function Home(props: HomePageProps) {
   const router = useRouter();
-  const [userName, setUserName] = useState<string>("User");
-
-  async function getName() {
-    const user: any = await getSession();
-    setUserName(user?.firstName);
-  }
-
-  useEffect(() => {
-    getName();
-  }, []);
 
   return (
     <div>
-      <NavBar />
+      <NavBar pageSession={props?.pageSession}/>
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>
-            Hello {userName}!
+            Hello {props?.pageSession?.firstName}!
           </h2>
           <button
             className="btn btn-primary btn-lg"
@@ -35,14 +32,14 @@ export default function Home() {
             Book an appointment
           </button>
         </div>
-        <CardsContainer />
+        <CardsContainer acceptedCards={props?.acceptedCards} pendingCards={props?.pendingCards} rejectedCards={props?.rejectedCards} />
       </div>
     </div>
   );
 }
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(
+  const session: any = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions
@@ -57,9 +54,30 @@ export async function getServerSideProps(context: any) {
     };
   }
 
+  const acceptedCards = await getAcceptedAppointments(session?.userId);
+  for (let appointment of acceptedCards) {
+    const doctor = await getUser(appointment.doctorId);
+    appointment.doctorId = doctor?.lastName;
+  }
+
+  const pendingCards = await getPendingAppointments(session?.userId);
+  for (let appointment of pendingCards) {
+    const doctor = await getUser(appointment.doctorId);
+    appointment.doctorId = doctor?.lastName;
+  }
+
+  const rejectedCards = await getRejectedAppointments(session?.userId);
+  for (let appointment of rejectedCards){
+    const doctor = await getUser(appointment.doctorId);
+    appointment.doctorId = doctor?.lastName;
+  }
+
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
+      pageSession: JSON.parse(JSON.stringify(session)),
+      acceptedCards: JSON.parse(JSON.stringify(acceptedCards)),
+      pendingCards: JSON.parse(JSON.stringify(pendingCards)),
+      rejectedCards: JSON.parse(JSON.stringify(rejectedCards)),
     },
   };
 }

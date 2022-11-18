@@ -7,52 +7,42 @@ import { UserType } from "../types";
 import { deleteUser, updateUser } from "../utils/apiService";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-export default function ProfilePage() {
-  const router = useRouter();
-  const user = useRef<UserType>();
-  const [age, setAge] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [disable, setDisable] = useState<boolean>(true);
+interface ProfilePageProps {
+  pageSession: UserType;
+}
 
-  async function getUserInformation() {
-    const userInformation: any = await getSession();
-    user.current = userInformation;
-    setAge(userInformation?.age);
-    setPhoneNumber(userInformation?.phoneNumber);
-    setAddress(userInformation?.address);
-  }
+export default function ProfilePage({ pageSession }: ProfilePageProps) {
+  const router = useRouter();
+  const [age, setAge] = useState<string>(pageSession?.age?.toString() || '');
+  const [phoneNumber, setPhoneNumber] = useState<string>(pageSession?.phoneNumber || '');
+  const [address, setAddress] = useState<string>(pageSession?.address || '');
+  const [disable, setDisable] = useState<boolean>(true);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     //validate
-    if (user.current?.userId)
-      await updateUser(
-        user?.current?.userId,
-        parseInt(age),
-        phoneNumber,
-        address
-      );
+    await updateUser(
+      pageSession?.userId,
+      parseInt(age),
+      phoneNumber,
+      address
+    );
     setDisable(true);
   }
 
   async function deleteUserFunction() {
     if (confirm("Are you sure you want to delete your account?")) {
-      if (!user.current?.userId) return;
-      const response = await deleteUser(user.current?.userId);
+      if (!pageSession?.userId) return;
+      const response = await deleteUser(pageSession?.userId);
       if (!response) return;
       signOut();
       router.push("/login");
     }
   }
 
-  useEffect(() => {
-    getUserInformation();
-  }, []);
-
   return (
     <>
-      <NavBar />
+      <NavBar pageSession={pageSession}/>
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>Profile</h2>
@@ -164,7 +154,7 @@ export async function getServerSideProps(context: any) {
 
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
+      pageSession: JSON.parse(JSON.stringify(session)),
     },
   };
 }
