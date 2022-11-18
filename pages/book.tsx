@@ -7,27 +7,21 @@ import { UserType } from "../types";
 import { createAppointment, getAllDoctors } from "../utils/apiService";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-export default function BookAppointment() {
+interface BookPageProps {
+  doctors: UserType[];
+  pageSession: UserType;
+}
+
+export default function BookAppointment({ pageSession, doctors }: BookPageProps) {
   const [doctor, setDoctor] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [doctorList, setDoctorList] = useState<UserType[]>([]);
-
-  async function getDoctors() {
-    const doctors = await getAllDoctors();
-    setDoctorList(doctors);
-  }
-
-  useEffect(() => {
-    getDoctors();
-  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const user: any = await getSession();
     await createAppointment({
-      patientId: user?.userId,
+      patientId: pageSession?.userId,
       date,
       time,
       description,
@@ -37,7 +31,7 @@ export default function BookAppointment() {
 
   return (
     <>
-      <Navbar />
+      <Navbar pageSession={pageSession}/>
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>Book Appointment</h2>
@@ -52,7 +46,7 @@ export default function BookAppointment() {
               onChange={(e) => setDoctor(e.target.value)}
             >
               <option selected>Select Doctor</option>
-              {doctorList?.map((doctor) => (
+              {doctors?.map((doctor: UserType) => (
                 <option value={doctor?.userId} key={doctor?.userId}>
                   Dr. {doctor?.lastName}
                 </option>
@@ -121,10 +115,11 @@ export async function getServerSideProps(context: any) {
       },
     };
   }
-
+  const doctors = await getAllDoctors();
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
+      pageSession: JSON.parse(JSON.stringify(session)),
+      doctors: JSON.parse(JSON.stringify(doctors)),
     },
   };
 }
