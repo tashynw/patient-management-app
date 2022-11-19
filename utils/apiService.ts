@@ -68,6 +68,23 @@ export async function getUser(userId: string): Promise<UserType> {
   }
 }
 
+export async function getPatientsWithFirstName(firstName: string): Promise<UserType[]> {
+  try {
+    const requestBody = { query: firstName };
+    const request: Response = await fetch(`${HOST_NAME}/api/user/fetch`, {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const patients = await request.json();
+    return patients.body;
+  } catch (e) {
+    console.log(`Error getPatientWithFirstName() ${e}`);
+    throw new Error(`Error in getPatientWithFirstName()`);
+  }
+}
+
 export async function createAppointment(
   input: CreateAppointmentInput
 ): Promise<boolean> {

@@ -16,7 +16,14 @@ export default async function handler(
   await dbConnect();
 
   try {
-    const users = await User.find({ role: query }).exec();
+    if(query=="Doctor" || query=="Patient"){
+      const users = await User.find({ role: query }).exec();
+      if (!users) return res.status(400).json({ message: "Users not found" });
+      users.forEach((user) => (user.password = ""));
+      return res.status(200).json({ body: users });
+    }
+
+    const users = await User.find({ firstName: query, role: "Patient" }).exec();
     if (!users) return res.status(400).json({ message: "Users not found" });
     users.forEach((user) => (user.password = ""));
     return res.status(200).json({ body: users });

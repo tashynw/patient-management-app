@@ -1,7 +1,9 @@
 import { unstable_getServerSession } from 'next-auth';
-import React from 'react'
+import Link from 'next/link';
+import React, { useState } from 'react'
 import NavBar from '../../components/navbar';
-import { UserType } from '../../types';
+import { AppointmentType, UserType } from '../../types';
+import { getAllAppointments, getPatientsWithFirstName } from '../../utils/apiService';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface DoctorPageProps{
@@ -9,6 +11,19 @@ interface DoctorPageProps{
 }
 
 const DoctorPage = (props: DoctorPageProps) => {
+    const [firstName, setFirstName] = useState<string>('');
+    const [patients,setPatients] = useState<(UserType & {appointments?: AppointmentType[]})[]>([]);
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
+        e.preventDefault();
+        const foundPatients: any = await getPatientsWithFirstName(firstName);
+        for(let patient of foundPatients){
+            const appointments = await getAllAppointments(patient?.userId);
+            patient["appointments"] = appointments;
+        }
+        setPatients(foundPatients);
+    }
+
     return (
         <>
             <NavBar pageSession={props?.pageSession}/>
@@ -18,16 +33,17 @@ const DoctorPage = (props: DoctorPageProps) => {
                 </div>
                 <br />
                 <br />
-                <form>
-                    <div className="form-group w-25">
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group w-50">
                         <div
                         className="input-group d-flex align-items-center"
                         style={{ gap: "10px" }}
                         >
-                        <label>Enter Patient's Full Name</label>
+                        <label>Enter Patient's First Name</label>
                         <input
                             type="search"
                             className="form-control"
+                            onChange={(e)=>setFirstName(e.target.value)}
                             required
                         />
                         </div>
@@ -39,39 +55,31 @@ const DoctorPage = (props: DoctorPageProps) => {
                     <table className="table table-striped">
                         <thead>
                             <tr>
-                            <th scope="col">FirstName</th>
-                            <th scope="col">LastName</th>
-                            <th scope="col">Age</th>
-                            <th scope="col">Number</th>
-                            <th scope="col">Address</th>
-                            <th scope="col">Appointments</th>
+                                <th scope="col">FirstName</th>
+                                <th scope="col">LastName</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">Number</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">Appointments</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                                <td>@mdo</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                                <td>@fat</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                                <td>@twitter</td>
-                                <td>@twitter</td>
-                            </tr>
+                            {patients?.map((patient)=>(
+                                <tr key={patient?.userId}>
+                                    <td>{patient?.firstName}</td>
+                                    <td>{patient?.lastName}</td>
+                                    <td>{!patient?.age ? "" : patient?.age}</td>
+                                    <td>{patient?.phoneNumber}</td>
+                                    <td>{patient?.address}</td>
+                                    <td>
+                                        {patient?.appointments?.map((appointment, i)=>(
+                                            <Link href={`/appointment/${appointment?.appointmentId}`} key={appointment?.appointmentId}>
+                                                {`Appointment ${i+1}\n\n`}
+                                            </Link>      
+                                        ))}
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
