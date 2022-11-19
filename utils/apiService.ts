@@ -23,6 +23,21 @@ export async function createUser(input: CreateUserInput): Promise<boolean> {
   }
 }
 
+export async function createDoctor(input: CreateUserInput): Promise<boolean> {
+  try {
+    const requestBody = { ...input, role: "Doctor" };
+    const request = await fetch(`${HOST_NAME}/api/user/signup`, {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: { "Content-Type": "application/json" },
+    });
+    return request.ok;
+  } catch (e) {
+    console.log(`Error createUser() ${e}`);
+    throw new Error(`Error in createUser()`);
+  }
+}
+
 export async function loginUser(input: LoginUserInput): Promise<UserType> {
   try {
     const request = await fetch(`${HOST_NAME}/api/user/login`, {
@@ -30,8 +45,8 @@ export async function loginUser(input: LoginUserInput): Promise<UserType> {
       body: JSON.stringify(input),
       headers: { "Content-Type": "application/json" },
     });
-    const user: UserType = await request.json();
-    return user;
+    const user = await request.json();
+    return user.body;
   } catch (e) {
     console.log(`Error loginUser() ${e}`);
     throw new Error(`Error in loginUser()`);

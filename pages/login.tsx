@@ -4,23 +4,49 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import NavBar from "../components/navbar";
+import { UserType } from "../types";
+import { getUser, loginUser } from "../utils/apiService";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-export default function LoginPage() {
+interface LoginPageProps {
+  pageSession: UserType;
+}
+
+export default function LoginPage(props: LoginPageProps) {
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loginFailed, setLoginFailed] = useState<boolean>(false);
+  const [isDoctor, setIsDoctor] = useState<boolean>(false);
+  const [doctorPassword, setDoctorPassword] = useState<string>("");
 
   async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const loginStatus = await signIn("credentials", {
+    let loginStatus;
+    if(!isDoctor){
+      loginStatus = await loginUser({ email, password });
+      if(!loginStatus || loginStatus?.role=="Doctor") return setLoginFailed(true);
+
+      loginStatus = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (!loginStatus?.ok) return setLoginFailed(true);
+      return router.push("/");
+    }
+    if (doctorPassword!="2jmX9Z^3TWl2") return setLoginFailed(true);
+    loginStatus = await loginUser({ email, password });
+    if(!loginStatus || loginStatus?.role!="Doctor") return setLoginFailed(true);
+
+    loginStatus = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
     if (!loginStatus?.ok) return setLoginFailed(true);
-    router.push("/");
+    //manage this
+    router.push("/");    
   }
 
   return (
@@ -32,7 +58,7 @@ export default function LoginPage() {
           height: "100vh",
         }}
       >
-        <NavBar />
+        <NavBar pageSession={props?.pageSession}/>
         <div
           className="container"
           style={{
@@ -83,6 +109,26 @@ export default function LoginPage() {
                   />
                 </div>
                 <br />
+                {isDoctor && 
+                  <div className="form-group">
+                    <label>Enter Doctor's code</label>
+                    <input
+                      type="password"
+                      className="form-control mt-2"
+                      placeholder="Enter password"
+                      required
+                      onChange={(e) => setDoctorPassword(e.target.value)}
+                    />
+                  </div>
+                }
+                <br />
+                <div className="form-check">
+                  <label className="form-check-label">
+                    Are you a Doctor?
+                    <input className="form-check-input" type="checkbox" checked={isDoctor} onChange={()=>setIsDoctor(!isDoctor)}/>
+                  </label>
+                </div>
+                <br />
                 <div className="text-center">
                   <button
                     type="submit"
@@ -130,7 +176,7 @@ export async function getServerSideProps(context: any) {
 
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
+      pageSession: JSON.parse(JSON.stringify(session)),
     },
   };
 }
