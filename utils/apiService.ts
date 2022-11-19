@@ -73,6 +73,23 @@ export async function createAppointment(
   }
 }
 
+export async function getAppointment(
+  appointmentId: string
+): Promise<AppointmentType> {
+  try {
+    const request = await fetch(`${HOST_NAME}/api/appointment/${appointmentId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const appointment = await request.json();
+    return appointment.body;
+  } catch (e) {
+    console.error(`Error getPendingAppointments() ${e}`);
+    throw new Error(`Error in getPendingAppointments()`);
+  }
+}
+
 export async function getPendingAppointments(
   patientId: string
 ): Promise<AppointmentType[]> {
