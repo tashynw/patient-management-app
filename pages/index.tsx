@@ -45,7 +45,7 @@ export async function getServerSideProps(context: any) {
     authOptions
   );
 
-  if (!session) {
+  if (!session || session?.role=="Doctor") {
     return {
       redirect: {
         destination: "/login",

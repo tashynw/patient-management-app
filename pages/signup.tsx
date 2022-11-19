@@ -51,7 +51,7 @@ export default function SignUpPage(props: SignUpPageProps) {
           redirect: false,
         });
         if (!loginStatus?.ok) return setSignUpFailed(true);
-        return router.push("/");
+        return router.push("/doctor");
       }
       await createUser({ firstName, lastName, email, password, ipAddress });
       const loginStatus = await signIn("credentials", {
@@ -219,16 +219,17 @@ export default function SignUpPage(props: SignUpPageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(
+  const session: any = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions
   );
 
   if (session) {
+    const redirectDestination = (session?.role == "Doctor") ? "/doctor" : "/";
     return {
       redirect: {
-        destination: "/",
+        destination: redirectDestination,
         permanent: false,
       },
     };

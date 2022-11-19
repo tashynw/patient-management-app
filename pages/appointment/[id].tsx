@@ -69,13 +69,13 @@ export default function Appointment(props: ArticlePageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(
+  const session: any = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions
   );
 
-  if (!session) {
+  if (!session || session?.role=="Doctor") {
     return {
       redirect: {
         destination: "/login",

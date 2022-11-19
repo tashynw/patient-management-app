@@ -45,8 +45,7 @@ export default function LoginPage(props: LoginPageProps) {
       redirect: false,
     });
     if (!loginStatus?.ok) return setLoginFailed(true);
-    //manage this
-    router.push("/");    
+    router.push("/doctor");    
   }
 
   return (
@@ -159,16 +158,17 @@ export default function LoginPage(props: LoginPageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(
+  const session: any = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions
   );
 
   if (session) {
+    const redirectDestination = (session?.role == "Doctor") ? "/doctor" : "/";
     return {
       redirect: {
-        destination: "/",
+        destination: redirectDestination,
         permanent: false,
       },
     };
