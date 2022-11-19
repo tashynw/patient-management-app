@@ -14,12 +14,10 @@ const Cards: React.FC<CardProps> = (props: CardProps) => {
       {props?.cards?.map((card) => (
         <div
           className="appointment-card"
+          style={{cursor:'pointer'}}
           key={card?.appointmentId}
           onClick={() =>
-            router.push({
-              pathname: `/appointment/${card.appointmentId}`,
-              query: card,
-            })
+            router.push(`/appointment/${card?.appointmentId}`)
           }
         >
           <div className="card-header">

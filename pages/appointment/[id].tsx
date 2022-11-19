@@ -1,15 +1,19 @@
 import { unstable_getServerSession } from "next-auth";
-import { useRouter } from "next/router";
 import React from "react";
 import NavBar from "../../components/navbar";
+import { AppointmentType, UserType } from "../../types";
+import { getAppointment, getUser } from "../../utils/apiService";
 import { authOptions } from "../api/auth/[...nextauth]";
 
-export default function Appointment() {
-  const router = useRouter();
-  const data = router.query;
+interface ArticlePageProps {
+  appointment: AppointmentType;
+  pageSession: UserType;
+}
+
+export default function Appointment(props: ArticlePageProps) {
   return (
     <>
-      <NavBar />
+      <NavBar pageSession={props?.pageSession}/>
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>Appointment</h2>
@@ -23,7 +27,7 @@ export default function Appointment() {
               type="text"
               className="form-control mt-2"
               disabled
-              value={`Dr. ${data?.doctorId}`}
+              value={`Dr. ${props?.appointment?.doctorId}`}
             />
           </div>
           <br />
@@ -33,7 +37,7 @@ export default function Appointment() {
               type="date"
               className="form-control mt-2"
               disabled
-              value={data?.date}
+              value={props?.appointment?.date}
             />
           </div>
           <br />
@@ -43,7 +47,7 @@ export default function Appointment() {
               type="time"
               className="form-control mt-2"
               disabled
-              value={data?.time}
+              value={props?.appointment?.time}
             />
           </div>
           <br />
@@ -53,11 +57,11 @@ export default function Appointment() {
               className="form-control mt-3"
               style={{ height: "100px" }}
               disabled
-              value={data?.description}
+              value={props?.appointment?.description}
             ></textarea>
           </div>
           <br />
-          <p className="text-primary">{data?.appointmentStatus}</p>
+          <p className="text-primary">{props?.appointment?.appointmentStatus}</p>
         </form>
       </div>
     </>
@@ -80,9 +84,25 @@ export async function getServerSideProps(context: any) {
     };
   }
 
+  const id = context.params.id;
+  const appointment: AppointmentType = await getAppointment(id);
+
+  if(!appointment){
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  const doctor = await getUser(appointment.doctorId);
+  appointment.doctorId = doctor?.lastName;
+  
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
+      pageSession: JSON.parse(JSON.stringify(session)),
+      appointment: JSON.parse(JSON.stringify(appointment))
     },
   };
 }
