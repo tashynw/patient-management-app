@@ -2,12 +2,17 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
 import NavBar from "../components/navbar";
-import { createUser } from "../utils/apiService";
+import { createDoctor, createUser } from "../utils/apiService";
 import { useRouter } from "next/router";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { UserType } from "../types";
 
-export default function SignUpPage() {
+interface SignUpPageProps {
+  pageSession: UserType;
+}
+
+export default function SignUpPage(props: SignUpPageProps) {
   const router = useRouter();
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
@@ -17,6 +22,8 @@ export default function SignUpPage() {
   const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
   const [matchPasswordRegex, setMatchPasswordRegex] = useState<boolean>(true);
   const [signUpFailed, setSignUpFailed] = useState<boolean>(false);
+  const [isDoctor, setIsDoctor] = useState<boolean>(false);
+  const [doctorPassword, setDoctorPassword] = useState<string>("");
 
   const getIpAddress = async (): Promise<string> => {
     const res = await fetch("https://geolocation-db.com/json/");
@@ -35,6 +42,17 @@ export default function SignUpPage() {
       )
         return setMatchPasswordRegex(false);
       const ipAddress: string = await getIpAddress();
+      if(isDoctor){
+        if(doctorPassword!="2jmX9Z^3TWl2") return setSignUpFailed(true);
+        await createDoctor({ firstName, lastName, email, password, ipAddress });
+        const loginStatus = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+        if (!loginStatus?.ok) return setSignUpFailed(true);
+        return router.push("/doctor");
+      }
       await createUser({ firstName, lastName, email, password, ipAddress });
       const loginStatus = await signIn("credentials", {
         email,
@@ -55,7 +73,7 @@ export default function SignUpPage() {
         height: "100vh",
       }}
     >
-      <NavBar />
+      <NavBar pageSession={props?.pageSession}/>
       <div className="container" style={{ height: "88vh" }}>
         <div
           className="column h-100 d-flex justify-content-center align-items-center"
@@ -152,6 +170,26 @@ export default function SignUpPage() {
                 )}
               </div>
               <br />
+              {isDoctor && 
+                <div className="form-group">
+                  <label>Enter Doctor's code</label>
+                  <input
+                    type="password"
+                    className="form-control mt-2"
+                    placeholder="Enter password"
+                    required
+                    onChange={(e) => setDoctorPassword(e.target.value)}
+                  />
+                </div>
+              }
+              <br />
+              <div className="form-check">
+                <label className="form-check-label">
+                  Are you a Doctor?
+                  <input className="form-check-input" type="checkbox" checked={isDoctor} onChange={()=>setIsDoctor(!isDoctor)}/>
+                </label>
+              </div>
+              <br />
               <div className="text-center">
                 <button
                   type="submit"
@@ -181,16 +219,17 @@ export default function SignUpPage() {
 }
 
 export async function getServerSideProps(context: any) {
-  const session = await unstable_getServerSession(
+  const session: any = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions
   );
 
   if (session) {
+    const redirectDestination = (session?.role == "Doctor") ? "/doctor" : "/";
     return {
       redirect: {
-        destination: "/",
+        destination: redirectDestination,
         permanent: false,
       },
     };
@@ -198,7 +237,7 @@ export async function getServerSideProps(context: any) {
 
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
+      pageSession: JSON.parse(JSON.stringify(session)),
     },
   };
 }

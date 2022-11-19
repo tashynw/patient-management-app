@@ -23,6 +23,21 @@ export async function createUser(input: CreateUserInput): Promise<boolean> {
   }
 }
 
+export async function createDoctor(input: CreateUserInput): Promise<boolean> {
+  try {
+    const requestBody = { ...input, role: "Doctor" };
+    const request = await fetch(`${HOST_NAME}/api/user/signup`, {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: { "Content-Type": "application/json" },
+    });
+    return request.ok;
+  } catch (e) {
+    console.log(`Error createUser() ${e}`);
+    throw new Error(`Error in createUser()`);
+  }
+}
+
 export async function loginUser(input: LoginUserInput): Promise<UserType> {
   try {
     const request = await fetch(`${HOST_NAME}/api/user/login`, {
@@ -30,8 +45,8 @@ export async function loginUser(input: LoginUserInput): Promise<UserType> {
       body: JSON.stringify(input),
       headers: { "Content-Type": "application/json" },
     });
-    const user: UserType = await request.json();
-    return user;
+    const user = await request.json();
+    return user.body;
   } catch (e) {
     console.log(`Error loginUser() ${e}`);
     throw new Error(`Error in loginUser()`);
@@ -50,6 +65,23 @@ export async function getUser(userId: string): Promise<UserType> {
   } catch (e) {
     console.log(`Error loginUser() ${e}`);
     throw new Error(`Error in loginUser()`);
+  }
+}
+
+export async function getPatientsWithFirstName(firstName: string): Promise<UserType[]> {
+  try {
+    const requestBody = { query: firstName };
+    const request: Response = await fetch(`${HOST_NAME}/api/user/fetch`, {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const patients = await request.json();
+    return patients.body;
+  } catch (e) {
+    console.log(`Error getPatientWithFirstName() ${e}`);
+    throw new Error(`Error in getPatientWithFirstName()`);
   }
 }
 
@@ -171,6 +203,92 @@ export async function getAllAppointments(
   } catch (e) {
     console.error(`Error getAllAppointments() ${e}`);
     throw new Error(`Error in getAllAppointments()`);
+  }
+}
+
+export async function getPendingAppointmentsForDoctor(
+  doctorId: string
+): Promise<AppointmentType[]> {
+  try {
+    const requestBody = { doctorId, query: "PENDING" };
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/appointment/fetch`,
+      {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const appointments = await request.json();
+    return appointments.body;
+  } catch (e) {
+    console.error(`Error getAllAppointmentsForDoctor() ${e}`);
+    throw new Error(`Error in getAllAppointmentsForDoctor()`);
+  }
+}
+
+export async function getAccceptedAppointmentsForDoctor(
+  doctorId: string
+): Promise<AppointmentType[]> {
+  try {
+    const requestBody = { doctorId, query: "ACCEPTED" };
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/appointment/fetch`,
+      {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const appointments = await request.json();
+    return appointments.body;
+  } catch (e) {
+    console.error(`Error getAllAppointmentsForDoctor() ${e}`);
+    throw new Error(`Error in getAllAppointmentsForDoctor()`);
+  }
+}
+
+export async function getRejectedAppointmentsForDoctor(
+  doctorId: string
+): Promise<AppointmentType[]> {
+  try {
+    const requestBody = { doctorId, query: "REJECTED" };
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/appointment/fetch`,
+      {
+        method: "POST",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const appointments = await request.json();
+    return appointments.body;
+  } catch (e) {
+    console.error(`Error getAllAppointmentsForDoctor() ${e}`);
+    throw new Error(`Error in getAllAppointmentsForDoctor()`);
+  }
+}
+
+export async function updateAppointment(
+  appointmentId: string,
+  date: string,
+  description: string,
+  appointmentStatus: string
+): Promise<boolean> {
+  try {
+    const requestBody = { date, description, appointmentStatus };
+    const request: Response = await fetch(
+      `${HOST_NAME}/api/appointment/edit/${appointmentId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return request.ok;
+  } catch (e) {
+    console.error(`Error updateAppointment() ${e}`);
+    throw new Error(`Error in updateAppointment()`);
   }
 }
 

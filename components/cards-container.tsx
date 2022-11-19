@@ -1,11 +1,12 @@
 import React from "react";
-import { AppointmentType } from "../types";
+import { AppointmentType, UserType } from "../types";
 import Cards from "./cards";
 
 interface CardsContainerProps {
   acceptedCards: AppointmentType[];
   pendingCards: AppointmentType[];
   rejectedCards: AppointmentType[];
+  pageSession: UserType;
 }
 
 const CardsContainer = (props: CardsContainerProps) => {
@@ -13,7 +14,7 @@ const CardsContainer = (props: CardsContainerProps) => {
     return props?.acceptedCards?.length ? (
       <>
         <h5 className="mt-5 text-muted">Accepted Appointments</h5>
-        <Cards cards={props?.acceptedCards} />
+        <Cards cards={props?.acceptedCards} pageSession={props?.pageSession} />
       </>
     ) : null;
   }
@@ -22,7 +23,7 @@ const CardsContainer = (props: CardsContainerProps) => {
     return props?.pendingCards?.length ? (
       <>
         <h5 className="mt-5 text-muted">Pending Appointments</h5>
-        <Cards cards={props?.pendingCards} />
+        <Cards cards={props?.pendingCards} pageSession={props?.pageSession} />
       </>
     ) : null;
   }
@@ -31,7 +32,7 @@ const CardsContainer = (props: CardsContainerProps) => {
     return props?.rejectedCards?.length ? (
       <>
         <h5 className="mt-5 text-muted">Rejected Appointments</h5>
-        <Cards cards={props?.rejectedCards} />
+        <Cards cards={props?.rejectedCards} pageSession={props?.pageSession} />
       </>
     ) : null;
   }

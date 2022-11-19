@@ -12,16 +12,23 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { patientId, query } = req.body;
+  const { patientId, query, doctorId } = req.body;
   await dbConnect();
 
   try {
     let appointments;
     if (query) {
-      appointments = await Appointment.find({
-        patientId,
-        appointmentStatus: AppointmentFetchQueries[query],
-      }).exec();
+      if (doctorId) {
+        appointments = await Appointment.find({
+          doctorId,
+          appointmentStatus: AppointmentFetchQueries[query],
+        }).exec();
+      } else {
+        appointments = await Appointment.find({
+          patientId,
+          appointmentStatus: AppointmentFetchQueries[query],
+        }).exec();
+      }
     } else {
       appointments = await Appointment.find({ patientId }).exec();
     }

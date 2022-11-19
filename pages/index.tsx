@@ -3,7 +3,12 @@ import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { useRouter } from "next/router";
 import CardsContainer from "../components/cards-container";
-import { getAcceptedAppointments, getPendingAppointments, getRejectedAppointments, getUser } from "../utils/apiService";
+import {
+  getAcceptedAppointments,
+  getPendingAppointments,
+  getRejectedAppointments,
+  getUser,
+} from "../utils/apiService";
 import { AppointmentType, UserType } from "../types";
 
 interface HomePageProps {
@@ -18,12 +23,10 @@ export default function Home(props: HomePageProps) {
 
   return (
     <div>
-      <NavBar pageSession={props?.pageSession}/>
+      <NavBar pageSession={props?.pageSession} />
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
-          <h2>
-            Hello {props?.pageSession?.firstName}!
-          </h2>
+          <h2>Hello {props?.pageSession?.firstName}!</h2>
           <button
             className="btn btn-primary btn-lg"
             style={{ color: "white" }}
@@ -32,7 +35,12 @@ export default function Home(props: HomePageProps) {
             Book an appointment
           </button>
         </div>
-        <CardsContainer acceptedCards={props?.acceptedCards} pendingCards={props?.pendingCards} rejectedCards={props?.rejectedCards} />
+        <CardsContainer
+          acceptedCards={props?.acceptedCards}
+          pendingCards={props?.pendingCards}
+          rejectedCards={props?.rejectedCards}
+          pageSession={props?.pageSession}
+        />
       </div>
     </div>
   );
@@ -45,7 +53,7 @@ export async function getServerSideProps(context: any) {
     authOptions
   );
 
-  if (!session) {
+  if (!session || session?.role == "Doctor") {
     return {
       redirect: {
         destination: "/login",
@@ -67,7 +75,7 @@ export async function getServerSideProps(context: any) {
   }
 
   const rejectedCards = await getRejectedAppointments(session?.userId);
-  for (let appointment of rejectedCards){
+  for (let appointment of rejectedCards) {
     const doctor = await getUser(appointment.doctorId);
     appointment.doctorId = doctor?.lastName;
   }
