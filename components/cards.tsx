@@ -1,10 +1,11 @@
 import { useRouter } from "next/router";
 import React from "react";
 import { HiOutlineUsers } from "react-icons/hi";
-import { AppointmentType } from "../types/index";
+import { AppointmentType, UserType } from "../types/index";
 
 interface CardProps {
   cards: AppointmentType[];
+  pageSession: UserType;
 }
 
 const Cards: React.FC<CardProps> = (props: CardProps) => {
@@ -14,17 +15,19 @@ const Cards: React.FC<CardProps> = (props: CardProps) => {
       {props?.cards?.map((card) => (
         <div
           className="appointment-card"
-          style={{cursor:'pointer'}}
+          style={{ cursor: "pointer" }}
           key={card?.appointmentId}
-          onClick={() =>
-            router.push(`/appointment/${card?.appointmentId}`)
-          }
+          onClick={() => router.push(`/appointment/${card?.appointmentId}`)}
         >
           <div className="card-header">
             <div className="icon-container">
               <HiOutlineUsers size={25} color="#23A6F0" />
             </div>
-            <p>Dr. {card.doctorId}</p>
+            {props?.pageSession?.role == "Patient" ? (
+              <p>Dr. {card.doctorId}</p>
+            ) : (
+              <p>{card.patientId}</p>
+            )}
           </div>
           <div className="card-description">
             <p className="text-muted">
