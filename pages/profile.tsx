@@ -2,6 +2,7 @@ import { unstable_getServerSession } from "next-auth";
 import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import NavBar from "../components/navbar";
 import { UserType } from "../types";
 import { deleteUser, updateUser } from "../utils/apiService";
@@ -13,36 +14,37 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ pageSession }: ProfilePageProps) {
   const router = useRouter();
-  const [age, setAge] = useState<string>(pageSession?.age?.toString() || '');
-  const [phoneNumber, setPhoneNumber] = useState<string>(pageSession?.phoneNumber || '');
-  const [address, setAddress] = useState<string>(pageSession?.address || '');
+  const [age, setAge] = useState<string>(pageSession?.age?.toString() || "");
+  const [phoneNumber, setPhoneNumber] = useState<string>(
+    pageSession?.phoneNumber || ""
+  );
+  const [address, setAddress] = useState<string>(pageSession?.address || "");
   const [disable, setDisable] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     //validate
-    await updateUser(
-      pageSession?.userId,
-      parseInt(age),
-      phoneNumber,
-      address
-    );
+    await updateUser(pageSession?.userId, parseInt(age), phoneNumber, address);
     setDisable(true);
   }
 
   async function deleteUserFunction() {
     if (confirm("Are you sure you want to delete your account?")) {
+      setIsLoading(true);
       if (!pageSession?.userId) return;
       const response = await deleteUser(pageSession?.userId);
       if (!response) return;
+      setIsLoading(false);
       signOut();
+      toast.success("Account and appointments successfully deletedd");
       router.push("/login");
     }
   }
 
   return (
     <>
-      <NavBar pageSession={pageSession}/>
+      <NavBar pageSession={pageSession} />
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>Profile</h2>
@@ -129,7 +131,13 @@ export default function ProfilePage({ pageSession }: ProfilePageProps) {
           className="btn btn-danger btn-lg text-white"
           onClick={() => deleteUserFunction()}
         >
-          Delete my account
+          Delete my account{" "}
+          {isLoading && (
+            <div
+              className="spinner-border text-white spinner-border-sm"
+              role="status"
+            ></div>
+          )}
         </button>
       </div>
     </>
@@ -143,7 +151,7 @@ export async function getServerSideProps(context: any) {
     authOptions
   );
 
-  if (!session || session?.role=="Doctor") {
+  if (!session || session?.role == "Doctor") {
     return {
       redirect: {
         destination: "/login",

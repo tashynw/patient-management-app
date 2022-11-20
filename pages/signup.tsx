@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { UserType } from "../types";
+import { toast } from "react-toastify";
 
 interface SignUpPageProps {
   pageSession: UserType;
@@ -24,6 +25,7 @@ export default function SignUpPage(props: SignUpPageProps) {
   const [signUpFailed, setSignUpFailed] = useState<boolean>(false);
   const [isDoctor, setIsDoctor] = useState<boolean>(false);
   const [doctorPassword, setDoctorPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const getIpAddress = async (): Promise<string> => {
     const res = await fetch("https://geolocation-db.com/json/");
@@ -34,16 +36,27 @@ export default function SignUpPage(props: SignUpPageProps) {
   const handleSignUpForm = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
-      if (password != confirmPassword) return setPasswordMismatch(true);
+      setIsLoading(true);
+      if (password != confirmPassword) {
+        setIsLoading(false);
+        return setPasswordMismatch(true);
+      }
       if (
         !new RegExp("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(
           password
         )
-      )
+      ) {
+        setIsLoading(false);
         return setMatchPasswordRegex(false);
+      }
+
       const ipAddress: string = await getIpAddress();
-      if(isDoctor){
-        if(doctorPassword!="2jmX9Z^3TWl2") return setSignUpFailed(true);
+      if (isDoctor) {
+        if (doctorPassword != "2jmX9Z^3TWl2") {
+          setIsLoading(false);
+          toast.error("Incorrect doctor code");
+          return setSignUpFailed(true);
+        }
         await createDoctor({ firstName, lastName, email, password, ipAddress });
         const loginStatus = await signIn("credentials", {
           email,
@@ -51,6 +64,8 @@ export default function SignUpPage(props: SignUpPageProps) {
           redirect: false,
         });
         if (!loginStatus?.ok) return setSignUpFailed(true);
+        setIsLoading(false);
+        toast.success("Account created successfully");
         return router.push("/doctor");
       }
       await createUser({ firstName, lastName, email, password, ipAddress });
@@ -60,6 +75,8 @@ export default function SignUpPage(props: SignUpPageProps) {
         redirect: false,
       });
       if (!loginStatus?.ok) return setSignUpFailed(true);
+      setIsLoading(false);
+      toast.success("Account created successfully");
       router.push("/");
     } catch (e) {
       console.log(e);
@@ -73,7 +90,7 @@ export default function SignUpPage(props: SignUpPageProps) {
         height: "100vh",
       }}
     >
-      <NavBar pageSession={props?.pageSession}/>
+      <NavBar pageSession={props?.pageSession} />
       <div className="container" style={{ height: "88vh" }}>
         <div
           className="column h-100 d-flex justify-content-center align-items-center"
@@ -83,8 +100,7 @@ export default function SignUpPage(props: SignUpPageProps) {
             <h1 className="text-white">Book Doctor Appointments</h1>
             <br />
             <h4 className="text-white">
-              Our doctors are both certified and experienced in the medical
-              field.
+              Sign up now and start booking your appointments online
             </h4>
             <br />
             <button className="btn btn-primary btn-lg text-white rounded-5">
@@ -170,7 +186,7 @@ export default function SignUpPage(props: SignUpPageProps) {
                 )}
               </div>
               <br />
-              {isDoctor && 
+              {isDoctor && (
                 <div className="form-group">
                   <label>Enter Doctor's code</label>
                   <input
@@ -181,12 +197,17 @@ export default function SignUpPage(props: SignUpPageProps) {
                     onChange={(e) => setDoctorPassword(e.target.value)}
                   />
                 </div>
-              }
+              )}
               <br />
               <div className="form-check">
                 <label className="form-check-label">
                   Are you a Doctor?
-                  <input className="form-check-input" type="checkbox" checked={isDoctor} onChange={()=>setIsDoctor(!isDoctor)}/>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={isDoctor}
+                    onChange={() => setIsDoctor(!isDoctor)}
+                  />
                 </label>
               </div>
               <br />
@@ -195,7 +216,13 @@ export default function SignUpPage(props: SignUpPageProps) {
                   type="submit"
                   className="btn btn-primary btn-lg text-white"
                 >
-                  Start Today!
+                  Start Today!{" "}
+                  {isLoading && (
+                    <div
+                      className="spinner-border text-white spinner-border-sm"
+                      role="status"
+                    ></div>
+                  )}
                 </button>
               </div>
             </form>
@@ -226,7 +253,7 @@ export async function getServerSideProps(context: any) {
   );
 
   if (session) {
-    const redirectDestination = (session?.role == "Doctor") ? "/doctor" : "/";
+    const redirectDestination = session?.role == "Doctor" ? "/doctor" : "/";
     return {
       redirect: {
         destination: redirectDestination,

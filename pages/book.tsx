@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
 import { unstable_getServerSession } from "next-auth";
 import { getSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Navbar from "../components/navbar";
 import { UserType } from "../types";
 import { createAppointment, getAllDoctors } from "../utils/apiService";
@@ -12,14 +14,20 @@ interface BookPageProps {
   pageSession: UserType;
 }
 
-export default function BookAppointment({ pageSession, doctors }: BookPageProps) {
+export default function BookAppointment({
+  pageSession,
+  doctors,
+}: BookPageProps) {
+  const router = useRouter();
   const [doctor, setDoctor] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsLoading(true);
     await createAppointment({
       patientId: pageSession?.userId,
       date,
@@ -27,11 +35,14 @@ export default function BookAppointment({ pageSession, doctors }: BookPageProps)
       description,
       doctorId: doctor,
     });
+    setIsLoading(false);
+    toast.success("Appointment booked successfully");
+    router.push("/");
   }
 
   return (
     <>
-      <Navbar pageSession={pageSession}/>
+      <Navbar pageSession={pageSession} />
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>Book Appointment</h2>
@@ -48,7 +59,7 @@ export default function BookAppointment({ pageSession, doctors }: BookPageProps)
               <option selected>Select Doctor</option>
               {doctors?.map((doctor: UserType) => (
                 <option value={doctor?.userId} key={doctor?.userId}>
-                  Dr. {doctor?.lastName}
+                  Dr. {`${doctor?.firstName} ${doctor?.lastName}`}
                 </option>
               ))}
             </select>
@@ -92,7 +103,13 @@ export default function BookAppointment({ pageSession, doctors }: BookPageProps)
           <br />
           <br />
           <button type="submit" className="btn btn-primary btn-lg text-white">
-            Submit
+            Submit{" "}
+            {isLoading && (
+              <div
+                className="spinner-border text-white spinner-border-sm"
+                role="status"
+              ></div>
+            )}
           </button>
         </form>
       </div>
@@ -107,7 +124,7 @@ export async function getServerSideProps(context: any) {
     authOptions
   );
 
-  if (!session || session?.role=="Doctor") {
+  if (!session || session?.role == "Doctor") {
     return {
       redirect: {
         destination: "/login",

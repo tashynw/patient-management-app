@@ -23,6 +23,10 @@ const DoctorAppointmentsPage = (props: DoctorAppointmentPageProps) => {
     <>
       <NavBar pageSession={props?.pageSession} />
       <div className="container">
+        <div className="h-100 d-flex justify-content-between align-items-center mt-5">
+          <h2>Appointments</h2>
+        </div>
+        <br />
         <CardsContainer
           acceptedCards={props?.acceptedCards}
           pendingCards={props?.pendingCards}
