@@ -37,8 +37,15 @@ const CardsContainer = (props: CardsContainerProps) => {
     ) : null;
   }
 
+  const isEmpty: boolean = (!props?.pendingCards?.length && !props?.acceptedCards?.length && !props?.rejectedCards?.length)
+
   return (
     <>
+      {isEmpty && 
+        <div style={{marginTop:'100px'}}>
+          <h5 className="text-center text-muted mt-5">{props?.pageSession?.role=="Patient" ? `No appointments made. Book an appointment now` : `No patient has booked you for an appointment.`}</h5>
+        </div>
+      }
       <AcceptedAppointments />
       <PendingAppointments />
       <RejectedAppointments />
