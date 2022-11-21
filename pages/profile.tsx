@@ -83,6 +83,7 @@ export default function ProfilePage({ pageSession }: ProfilePageProps) {
                 maxLength={15}
                 disabled={disable}
                 value={phoneNumber}
+                pattern="[0-9]{7,10}"
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
