@@ -39,7 +39,7 @@ export default function LoginPage(props: LoginPageProps) {
         email,
         password,
         redirect: false,
-      });
+      }).catch((e)=>console.log(e));
       if (!loginStatus?.ok) return setLoginFailed(true);
       setIsLoading(false);
       toast.success("Login successful");
