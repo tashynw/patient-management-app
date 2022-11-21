@@ -14,7 +14,7 @@ export default async function handler(
 ) {
   const { patientId, query, doctorId } = req.body;
   await dbConnect();
-
+  if(!patientId && !query && !doctorId) return res.status(400).json({ message: "Invalid request body" });
   try {
     let appointments;
     if (query) {
