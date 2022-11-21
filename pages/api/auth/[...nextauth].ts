@@ -8,7 +8,7 @@ dotenv.config();
 
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: "jwt",
+    strategy: "jwt"
   },
   callbacks: {
     session: async function ({ session, user, token }) {
