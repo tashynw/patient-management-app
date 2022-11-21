@@ -6,7 +6,7 @@ import {
   UserType,
 } from "../types";
 
-const HOST_NAME: string = "http://localhost:3000";
+const HOST_NAME: string = "https://patient-management-app.vercel.app/";
 
 export async function createUser(input: CreateUserInput): Promise<boolean> {
   try {
