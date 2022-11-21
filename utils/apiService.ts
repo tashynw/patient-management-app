@@ -117,8 +117,8 @@ export async function getAppointment(
     const appointment = await request.json();
     return appointment.body;
   } catch (e) {
-    console.error(`Error getPendingAppointments() ${e}`);
-    throw new Error(`Error in getPendingAppointments()`);
+    console.error(`Error getAppointment() ${e}`);
+    throw new Error(`Error in getAppointment()`);
   }
 }
 

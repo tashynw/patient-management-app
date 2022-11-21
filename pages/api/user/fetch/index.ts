@@ -13,6 +13,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const { query } = req.body;
+  if(!query) return res.status(400).json({ message: "Invalid request body" })
   await dbConnect();
 
   try {
