@@ -6,7 +6,7 @@ import {
   UserType,
 } from "../types";
 
-const HOST_NAME: string = "https://patient-management-app.vercel.app";
+const HOST_NAME: string = "https://patient-appointment-app.netlify.app";
 
 export async function createUser(input: CreateUserInput): Promise<boolean> {
   try {
