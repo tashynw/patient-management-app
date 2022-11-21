@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React, { useState } from 'react'
 import NavBar from '../../components/navbar';
 import { AppointmentType, UserType } from '../../types';
-import { getAllAppointments, getPatientsWithFirstName } from '../../utils/apiService';
+import { getAllAppointments, getAllPatients, getPatientsWithFirstName } from '../../utils/apiService';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface DoctorPageProps{
@@ -22,6 +22,15 @@ const DoctorPage = (props: DoctorPageProps) => {
             patient["appointments"] = appointments;
         }
         setPatients(foundPatients);
+    }
+
+    async function loadAllPatients(){
+        const allPatients: any = await getAllPatients();
+        for(let patient of allPatients){
+            const appointments = await getAllAppointments(patient?.userId);
+            patient["appointments"] = appointments;
+        }
+        setPatients(allPatients);
     }
 
     return (
@@ -46,9 +55,12 @@ const DoctorPage = (props: DoctorPageProps) => {
                             onChange={(e)=>setFirstName(e.target.value)}
                             required
                         />
+                        <button className='btn btn-primary text-white w-15'>Search</button>
                         </div>
                     </div>
+                    <br />      
                 </form>
+                <button className='btn btn-primary text-white' onClick={loadAllPatients}>View All Patients</button>
                 <br />
                 <br />
                 <div className="table-responsive">

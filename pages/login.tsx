@@ -3,6 +3,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import NavBar from "../components/navbar";
 import { UserType } from "../types";
 import { getUser, loginUser } from "../utils/apiService";
@@ -19,13 +20,20 @@ export default function LoginPage(props: LoginPageProps) {
   const [loginFailed, setLoginFailed] = useState<boolean>(false);
   const [isDoctor, setIsDoctor] = useState<boolean>(false);
   const [doctorPassword, setDoctorPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     let loginStatus;
-    if(!isDoctor){
+    setIsLoading(true);
+    if (!isDoctor) {
       loginStatus = await loginUser({ email, password });
-      if(!loginStatus || loginStatus?.role=="Doctor") return setLoginFailed(true);
+      if (!loginStatus || loginStatus?.role == "Doctor") {
+        setIsLoading(false);
+        console.log(loginStatus);
+        toast.error("Login failed - incorrect credentials");
+        return setLoginFailed(true);
+      }
 
       loginStatus = await signIn("credentials", {
         email,
@@ -33,11 +41,21 @@ export default function LoginPage(props: LoginPageProps) {
         redirect: false,
       });
       if (!loginStatus?.ok) return setLoginFailed(true);
+      setIsLoading(false);
+      toast.success("Login successful");
       return router.push("/");
     }
-    if (doctorPassword!="2jmX9Z^3TWl2") return setLoginFailed(true);
+    if (doctorPassword != "2jmX9Z^3TWl2") {
+      setIsLoading(false);
+      toast.error("Incorrect doctor passcode");
+      return setLoginFailed(true);
+    }
     loginStatus = await loginUser({ email, password });
-    if(!loginStatus || loginStatus?.role!="Doctor") return setLoginFailed(true);
+    if (!loginStatus || loginStatus?.role != "Doctor") {
+      setIsLoading(false);
+      toast.error("Login failed - incorrect credentials");
+      return setLoginFailed(true);
+    }
 
     loginStatus = await signIn("credentials", {
       email,
@@ -45,7 +63,9 @@ export default function LoginPage(props: LoginPageProps) {
       redirect: false,
     });
     if (!loginStatus?.ok) return setLoginFailed(true);
-    router.push("/doctor");    
+    setIsLoading(false);
+    toast.success("Login successful");
+    router.push("/doctor");
   }
 
   return (
@@ -57,7 +77,7 @@ export default function LoginPage(props: LoginPageProps) {
           height: "100vh",
         }}
       >
-        <NavBar pageSession={props?.pageSession}/>
+        <NavBar pageSession={props?.pageSession} />
         <div
           className="container"
           style={{
@@ -73,8 +93,7 @@ export default function LoginPage(props: LoginPageProps) {
               <h1 className="text-white">Book Doctor Appointments</h1>
               <br />
               <h4 className="text-white">
-                Our doctors are both certified and experienced in the medical
-                field.
+                Sign up now and start booking your appointments online
               </h4>
               <br />
               <button className="btn btn-primary btn-lg text-white rounded-5">
@@ -108,7 +127,7 @@ export default function LoginPage(props: LoginPageProps) {
                   />
                 </div>
                 <br />
-                {isDoctor && 
+                {isDoctor && (
                   <div className="form-group">
                     <label>Enter Doctor's code</label>
                     <input
@@ -119,12 +138,17 @@ export default function LoginPage(props: LoginPageProps) {
                       onChange={(e) => setDoctorPassword(e.target.value)}
                     />
                   </div>
-                }
+                )}
                 <br />
                 <div className="form-check">
                   <label className="form-check-label">
                     Are you a Doctor?
-                    <input className="form-check-input" type="checkbox" checked={isDoctor} onChange={()=>setIsDoctor(!isDoctor)}/>
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={isDoctor}
+                      onChange={() => setIsDoctor(!isDoctor)}
+                    />
                   </label>
                 </div>
                 <br />
@@ -133,7 +157,13 @@ export default function LoginPage(props: LoginPageProps) {
                     type="submit"
                     className="btn btn-primary btn-lg text-white"
                   >
-                    Submit
+                    Submit{" "}
+                    {isLoading && (
+                      <div
+                        className="spinner-border text-white spinner-border-sm"
+                        role="status"
+                      ></div>
+                    )}
                   </button>
                 </div>
               </form>
@@ -165,7 +195,7 @@ export async function getServerSideProps(context: any) {
   );
 
   if (session) {
-    const redirectDestination = (session?.role == "Doctor") ? "/doctor" : "/";
+    const redirectDestination = session?.role == "Doctor" ? "/doctor" : "/";
     return {
       redirect: {
         destination: redirectDestination,

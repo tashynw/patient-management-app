@@ -308,6 +308,22 @@ export async function getAllDoctors(): Promise<UserType[]> {
   }
 }
 
+export async function getAllPatients(): Promise<UserType[]> {
+  try {
+    const requestBody = { query: "Patient" };
+    const request: Response = await fetch(`${HOST_NAME}/api/user/fetch`, {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: { "Content-Type": "application/json" },
+    });
+    const patients = await request.json();
+    return patients.body;
+  } catch (e) {
+    console.error(`Error getAllPatients() ${e}`);
+    throw new Error(`Error in getAllPatients()`);
+  }
+}
+
 export async function updateUser(userId: string,age: number, phoneNumber: string, address: string): Promise<boolean>{
   try {
     const requestBody = { age, phoneNumber, address };
