@@ -18,54 +18,36 @@ export default function LoginPage(props: LoginPageProps) {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loginFailed, setLoginFailed] = useState<boolean>(false);
-  const [isDoctor, setIsDoctor] = useState<boolean>(false);
-  const [doctorPassword, setDoctorPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    let loginStatus;
     setIsLoading(true);
-    if (!isDoctor) {
-      loginStatus = await loginUser({ email, password });
-      if (!loginStatus || loginStatus?.role == "Doctor") {
-        setIsLoading(false);
-        console.log(loginStatus);
-        toast.error("Login failed - incorrect credentials");
-        return setLoginFailed(true);
-      }
 
-      loginStatus = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      }).catch((e)=>console.log(e));
-      if (!loginStatus?.ok) return setLoginFailed(true);
-      setIsLoading(false);
-      toast.success("Login successful");
-      return router.push("/");
-    }
-    if (doctorPassword != "2jmX9Z^3TWl2") {
-      setIsLoading(false);
-      toast.error("Incorrect doctor passcode");
-      return setLoginFailed(true);
-    }
-    loginStatus = await loginUser({ email, password });
-    if (!loginStatus || loginStatus?.role != "Doctor") {
+    const user = await loginUser({ email, password });
+    if(!user){
       setIsLoading(false);
       toast.error("Login failed - incorrect credentials");
       return setLoginFailed(true);
     }
 
-    loginStatus = await signIn("credentials", {
+    const loginStatus = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
-    if (!loginStatus?.ok) return setLoginFailed(true);
+    if (!loginStatus?.ok){
+      setIsLoading(false);
+      toast.error("Login error");
+      return setLoginFailed(true);
+    }
+
     setIsLoading(false);
     toast.success("Login successful");
-    router.push("/doctor");
+    if(user?.role == "Doctor"){
+      return router.push('/doctor')
+    }
+    return router.push('/')
   }
 
   return (
@@ -125,31 +107,6 @@ export default function LoginPage(props: LoginPageProps) {
                     required
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                </div>
-                <br />
-                {isDoctor && (
-                  <div className="form-group">
-                    <label>Enter Doctor's code</label>
-                    <input
-                      type="password"
-                      className="form-control mt-2"
-                      placeholder="Enter password"
-                      required
-                      onChange={(e) => setDoctorPassword(e.target.value)}
-                    />
-                  </div>
-                )}
-                <br />
-                <div className="form-check">
-                  <label className="form-check-label">
-                    Are you a Doctor?
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      checked={isDoctor}
-                      onChange={() => setIsDoctor(!isDoctor)}
-                    />
-                  </label>
                 </div>
                 <br />
                 <div className="text-center">

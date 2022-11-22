@@ -63,8 +63,26 @@ export async function getUser(userId: string): Promise<UserType> {
     const user = await request.json();
     return user.body;
   } catch (e) {
-    console.log(`Error loginUser() ${e}`);
-    throw new Error(`Error in loginUser()`);
+    console.log(`Error getUser() ${e}`);
+    throw new Error(`Error in getUser()`);
+  }
+}
+
+export async function getUserFromEmail(email: string): Promise<UserType> {
+  try {
+    const requestBody = { email };
+    const request = await fetch(`${HOST_NAME}/api/user/get`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody)
+    });
+
+    const user = await request.json();
+    user.body.password = "";
+    return user.body;
+  } catch (e) {
+    console.log(`Error getUserFromEmail() ${e}`);
+    throw new Error(`Error in getUserFromEmail()`);
   }
 }
 

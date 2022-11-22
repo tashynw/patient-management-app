@@ -2,7 +2,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
 import NavBar from "../components/navbar";
-import { createDoctor, createUser } from "../utils/apiService";
+import { createDoctor, createUser, getUserFromEmail } from "../utils/apiService";
 import { useRouter } from "next/router";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -48,6 +48,12 @@ export default function SignUpPage(props: SignUpPageProps) {
       ) {
         setIsLoading(false);
         return setMatchPasswordRegex(false);
+      }
+
+      const currentUser = await getUserFromEmail(email).catch((e)=>{});
+      if(currentUser){
+        setIsLoading(false);
+        return toast.error("Email already taken - try again");
       }
 
       const ipAddress: string = await getIpAddress();

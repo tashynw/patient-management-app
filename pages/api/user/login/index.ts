@@ -25,7 +25,7 @@ export default async function handler(
 
     const isMatch = await compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
-
+    user.password = "";
     return res.status(200).json({ body: user });
   } catch (e) {
     console.log(`Error login: ${e}`);
