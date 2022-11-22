@@ -17,7 +17,6 @@ export default function LoginPage(props: LoginPageProps) {
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [loginFailed, setLoginFailed] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
@@ -27,8 +26,7 @@ export default function LoginPage(props: LoginPageProps) {
     const user = await loginUser({ email, password });
     if(!user){
       setIsLoading(false);
-      toast.error("Login failed - incorrect credentials");
-      return setLoginFailed(true);
+      return toast.error("Login failed - incorrect credentials");
     }
 
     const loginStatus = await signIn("credentials", {
@@ -38,8 +36,7 @@ export default function LoginPage(props: LoginPageProps) {
     });
     if (!loginStatus?.ok){
       setIsLoading(false);
-      toast.error("Login error");
-      return setLoginFailed(true);
+      return toast.error("Login error");
     }
 
     setIsLoading(false);
@@ -132,9 +129,6 @@ export default function LoginPage(props: LoginPageProps) {
                 >
                   <strong>Don't have an account? Sign Up</strong>
                 </Link>
-                {loginFailed && (
-                  <p className="text-danger text-center">Login Failed</p>
-                )}
               </div>
             </div>
           </div>
