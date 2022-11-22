@@ -26,7 +26,7 @@ export async function sendAppointmentRequestEmail(
       fs.readFileSync("./emails/appointment_request_email/email.html", "utf-8")
     );
     const textTemplate = Handlebars.compile(
-      fs.readFileSync("../emails/appointment_request_email/email.txt", "utf-8")
+      fs.readFileSync("./emails/appointment_request_email/email.txt", "utf-8")
     );
 
     const templateData = {
