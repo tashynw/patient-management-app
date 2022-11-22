@@ -1,10 +1,10 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import dotenv from "dotenv";
 import dbConnect from "../../../utils/dbConnect";
 import User from "../../../models/User";
 
-dotenv.config();
+const stage = process.env.NEXT_PUBLIC_STAGE || "";
+const HOST_NAME: string = (stage=="dev") ? "http://localhost:3000" : "https://patient-appointment-app.netlify.app";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        const response = await fetch("https://patient-appointment-app.netlify.app/api/user/login", {
+        const response = await fetch(`${HOST_NAME}/api/user/login`, {
           method: "POST",
           body: JSON.stringify({
             email: credentials?.email,
@@ -45,8 +45,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         const user = await response.json();
-        console.log("user", user);
-        console.log("response", response);
         if (!response.ok || !user) return null;
 
         return {

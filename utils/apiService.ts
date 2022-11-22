@@ -6,7 +6,8 @@ import {
   UserType,
 } from "../types";
 
-const HOST_NAME: string = "https://patient-appointment-app.netlify.app";
+const stage = process.env.NEXT_PUBLIC_STAGE || "";
+const HOST_NAME: string = (stage=="dev") ? "http://localhost:3000" : "https://patient-appointment-app.netlify.app";
 
 export async function createUser(input: CreateUserInput): Promise<boolean> {
   try {
