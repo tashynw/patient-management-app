@@ -22,7 +22,6 @@ export default function SignUpPage(props: SignUpPageProps) {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
   const [matchPasswordRegex, setMatchPasswordRegex] = useState<boolean>(true);
-  const [signUpFailed, setSignUpFailed] = useState<boolean>(false);
   const [isDoctor, setIsDoctor] = useState<boolean>(false);
   const [doctorPassword, setDoctorPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -60,8 +59,7 @@ export default function SignUpPage(props: SignUpPageProps) {
       if (isDoctor) {
         if (doctorPassword != "2jmX9Z^3TWl2") {
           setIsLoading(false);
-          toast.error("Incorrect doctor code");
-          return setSignUpFailed(true);
+          return toast.error("Incorrect doctor code");
         }
         await createDoctor({ firstName, lastName, email, password, ipAddress });
         const loginStatus = await signIn("credentials", {
@@ -69,7 +67,7 @@ export default function SignUpPage(props: SignUpPageProps) {
           password,
           redirect: false,
         });
-        if (!loginStatus?.ok) return setSignUpFailed(true);
+        if (!loginStatus?.ok) return toast.error("Sign in failed");
         setIsLoading(false);
         toast.success("Account created successfully");
         return router.push("/doctor");
@@ -80,7 +78,7 @@ export default function SignUpPage(props: SignUpPageProps) {
         password,
         redirect: false,
       });
-      if (!loginStatus?.ok) return setSignUpFailed(true);
+      if (!loginStatus?.ok) return toast.error("Sign in failed");
       setIsLoading(false);
       toast.success("Account created successfully");
       router.push("/");
@@ -240,9 +238,6 @@ export default function SignUpPage(props: SignUpPageProps) {
               >
                 <strong>Already have an account? Login</strong>
               </Link>
-              {signUpFailed && (
-                <p className="text-danger text-center">SignUp Failed</p>
-              )}
             </div>
           </div>
         </div>
