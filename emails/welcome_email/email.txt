@@ -1,0 +1,3 @@
+Hi {{name}},
+
+Congratulations! You've successfully created an account with the Patient Appointment App. You can now visit the page and start booking your appointments.

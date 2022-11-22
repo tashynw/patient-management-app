@@ -1,0 +1,3 @@
+Hi Dr. {{lastName}},
+
+Patient {{patientName}} has requested an appoinment with you on {{date}} at {{time}}, saying "{{description}}". Login to accept/reject this request.

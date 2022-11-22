@@ -1,0 +1,3 @@
+Hi {{name}},
+
+Your appointment request with Dr. {{doctorName}} on {{date}} at {{time}} has been {{status}}.

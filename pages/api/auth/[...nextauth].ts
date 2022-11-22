@@ -44,9 +44,9 @@ export const authOptions: NextAuthOptions = {
           headers: { "Content-Type": "application/json" },
         });
 
-        const user = await response.json();
+        const user: any = await response.json();
         if (!response.ok || !user) return null;
-
+        user.body.password=""
         return {
           id: user.body.userId,
           name: `${user.body.firstName} ${user.body.lastName}`,
