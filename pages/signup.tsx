@@ -2,7 +2,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
 import NavBar from "../components/navbar";
-import { createDoctor, createUser, getUserFromEmail } from "../utils/apiService";
+import { createDoctor, createUser, getIpAddress, getUserFromEmail } from "../utils/apiService";
 import { useRouter } from "next/router";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -25,12 +25,6 @@ export default function SignUpPage(props: SignUpPageProps) {
   const [isDoctor, setIsDoctor] = useState<boolean>(false);
   const [doctorPassword, setDoctorPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const getIpAddress = async (): Promise<string> => {
-    const res = await fetch("https://geolocation-db.com/json/");
-    const json = await res.json();
-    return json.IPv4;
-  };
 
   const handleSignUpForm = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
@@ -57,7 +51,8 @@ export default function SignUpPage(props: SignUpPageProps) {
 
       const ipAddress: string = await getIpAddress();
       if (isDoctor) {
-        if (doctorPassword != "2jmX9Z^3TWl2") {
+        const passCode: string = process.env.NEXT_PUBLIC_DOCTOR_CODE || '';
+        if (doctorPassword != passCode) {
           setIsLoading(false);
           return toast.error("Incorrect doctor code");
         }

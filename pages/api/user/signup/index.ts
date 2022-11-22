@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import User from "../../../../models/User";
 import { UserType } from "../../../../types";
 import { hash } from "bcrypt"
+import { sendWelcomeEmail } from "../../../../emails/welcome_email/welcomeEmail";
 
 type Data = {
   name?: string;
@@ -51,6 +52,7 @@ export default async function handler(
       phoneNumber: "",
       address: "",
     });
+    if(role=="Patient") await sendWelcomeEmail(email,firstName); 
     res.status(200).json({ message: "User successfully created" });
   } catch (e) {
     console.error(`Create User Error: ${e}`);

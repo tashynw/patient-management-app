@@ -1,5 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { sendAppointmentResultEmail } from "../../../../emails/appointment_result_email/appointmentResultEmail";
 import Appointment from "../../../../models/Appointment";
+import User from "../../../../models/User";
+import { UserType } from "../../../../types";
+import { getUser } from "../../../../utils/apiService";
 import dbConnect from "../../../../utils/dbConnect";
 
 type Data = {
@@ -26,6 +30,10 @@ export default async function handler(
     );
     if (!response.acknowledged)
       return res.status(400).json({ message: "Error editing appointment" });
+    //sending result email
+    const patient: UserType = await User.findOne({ userId: appointment?.patientId }).exec()
+    const doctor: UserType = await User.findOne({ userId: appointment?.doctorId }).exec()
+    await sendAppointmentResultEmail(patient?.email,patient?.firstName,`${doctor?.firstName} ${doctor?.lastName}`,appointment?.date,appointment?.time,appointmentStatus)
     return res.status(200).json({ message: "Appointment edited successfully" });
   } catch (e) {
     console.log(`Delete appointment Error: ${e}`);

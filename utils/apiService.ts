@@ -387,3 +387,9 @@ export async function deleteUser(userId: string): Promise<boolean>{
     throw new Error(`Error in deleteUser()`);
   }
 }
+
+export async function getIpAddress():Promise<string>{
+  const res = await fetch("https://geolocation-db.com/json/");
+  const json = await res.json();
+  return json.IPv4;
+};
