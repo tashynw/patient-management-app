@@ -18,10 +18,10 @@ export async function sendWelcomeEmail(email: string, firstName: string) {
     });
 
     const htmlTemplate = Handlebars.compile(
-      fs.readFileSync("emails/welcome_email/email.html", "utf-8")
+      fs.readFileSync("./emails/welcome_email/email.html", "utf-8")
     );
     const textTemplate = Handlebars.compile(
-      fs.readFileSync("emails/welcome_email/email.txt", "utf-8")
+      fs.readFileSync("./emails/welcome_email/email.txt", "utf-8")
     );
 
     const templateData = {

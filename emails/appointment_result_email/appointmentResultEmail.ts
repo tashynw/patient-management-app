@@ -24,10 +24,10 @@ export async function sendAppointmentResultEmail(
     });
 
     const htmlTemplate = Handlebars.compile(
-      fs.readFileSync("emails/appointment_result_email/email.html", "utf-8")
+      fs.readFileSync("./emails/appointment_result_email/email.html", "utf-8")
     );
     const textTemplate = Handlebars.compile(
-      fs.readFileSync("emails/appointment_result_email/email.txt", "utf-8")
+      fs.readFileSync("./emails/appointment_result_email/email.txt", "utf-8")
     );
 
     const templateData = {
