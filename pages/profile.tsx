@@ -24,7 +24,6 @@ export default function ProfilePage({ pageSession }: ProfilePageProps) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    //validate
     await updateUser(pageSession?.userId, parseInt(age), phoneNumber, address);
     setDisable(true);
   }
@@ -34,10 +33,10 @@ export default function ProfilePage({ pageSession }: ProfilePageProps) {
       setIsLoading(true);
       if (!pageSession?.userId) return;
       const response = await deleteUser(pageSession?.userId);
-      if (!response) return;
+      if (!response) return toast.error("Account and appointments failed to delete");
       setIsLoading(false);
       signOut();
-      toast.success("Account and appointments successfully deletedd");
+      toast.success("Account and appointments successfully deleted");
       router.push("/login");
     }
   }

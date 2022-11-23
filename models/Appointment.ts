@@ -14,7 +14,6 @@ const AppointmentSchema: Schema = new Schema({
     type: String,
     required: true,
   },
-  //stringified to ISO format..
   date: {
     type: String,
     required: true,
@@ -23,7 +22,6 @@ const AppointmentSchema: Schema = new Schema({
     type: String,
     required: true,
   },
-  //patient enter reason for visit etc..
   description: {
     type: String,
     required: true,

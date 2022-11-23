@@ -1,5 +1,6 @@
 import { unstable_getServerSession } from "next-auth";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import NavBar from "../../components/navbar";
 import { AppointmentType, UserType } from "../../types";
 import {
@@ -28,7 +29,7 @@ export default function Appointment(props: ArticlePageProps) {
       props?.appointment?.description,
       e.target.value
     );
-    if (!response) return;
+    if (!response) return toast.error("Account failed to edit");
     setAppointmentStatus(e.target.value);
   }
 
@@ -98,6 +99,7 @@ export default function Appointment(props: ArticlePageProps) {
           <br />
           <p className="text-primary">{appointmentStatus}</p>
           {props?.pageSession?.role == "Doctor" &&
+            props?.appointment?.doctorId === props?.pageSession?.userId &&
             appointmentStatus == "Pending" && (
               <div className="form-group">
                 <label>Set Status</label>
