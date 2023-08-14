@@ -21,10 +21,11 @@ export default async function handler(
 
   try {
     const user: UserType = await User.findOne({ email }).exec();
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
     user.password = "";
     return res.status(200).json({ body: user });
   } catch (e) {

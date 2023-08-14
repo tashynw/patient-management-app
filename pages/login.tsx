@@ -3,11 +3,26 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import NavBar from "../components/navbar";
 import { UserType } from "../types";
-import { getUser, loginUser } from "../utils/apiService";
 import { authOptions } from "./api/auth/[...nextauth]";
+import {
+  Heading,
+  Input,
+  VStack,
+  FormControl,
+  FormLabel,
+  InputGroup,
+  InputRightElement,
+  Button,
+  Text,
+  FormErrorMessage,
+  useToast,
+} from "@chakra-ui/react";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { LoginForm, LoginFormSchema } from "../types/Authentication";
 
 interface LoginPageProps {
   pageSession: UserType;
@@ -15,37 +30,48 @@ interface LoginPageProps {
 
 export default function LoginPage(props: LoginPageProps) {
   const router = useRouter();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const toast = useToast();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(LoginFormSchema),
+  });
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  async function handleLoginForm(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true);
+  const submitSignIn = handleSubmit(async (values) => {
+    setLoading(true);
 
-    const user = await loginUser({ email, password });
-    if(!user){
-      setIsLoading(false);
-      return toast.error("Login failed - incorrect credentials");
-    }
-
-    const loginStatus = await signIn("credentials", {
-      email,
-      password,
+    const res = await signIn("credentials", {
       redirect: false,
+      email: values.email,
+      password: values.password,
     });
-    if (!loginStatus?.ok){
-      setIsLoading(false);
-      return toast.error("Login error");
-    }
 
-    setIsLoading(false);
-    toast.success("Login successful");
-    if(user?.role == "Doctor"){
-      return router.push('/doctor')
+    if (res?.error) {
+      toast({
+        title: `Login Failed`,
+        description: "Invalid Credentials",
+        status: "error",
+        duration: 5000,
+        position: "top-right",
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: `Login Successful`,
+        description: `You successfully logged in`,
+        status: "success",
+        duration: 5000,
+        position: "top-right",
+        isClosable: true,
+      });
+      router.push("/");
     }
-    return router.push('/')
-  }
+    setLoading(false);
+  });
 
   return (
     <>
@@ -75,62 +101,84 @@ export default function LoginPage(props: LoginPageProps) {
                 Sign up now and start booking your appointments online
               </h4>
               <br />
-              <button className="btn btn-primary btn-lg text-white rounded-5">
-                Set Appointment today
-              </button>
             </div>
-
-            <div className="w-30 p-4 bg-white rounded-3">
-              <h4 className="text-center">Login</h4>
-              <br />
-              <form onSubmit={handleLoginForm}>
-                <div className="form-group">
-                  <label>Email Address</label>
-                  <input
-                    type="email"
-                    className="form-control mt-2"
-                    placeholder="Enter email"
-                    required
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <br />
-                <div className="form-group">
-                  <label>Password</label>
-                  <input
-                    type="password"
-                    className="form-control mt-2"
+            <VStack borderRadius={8} bg="white" gap={5} p={5}>
+              <Heading size="md">Login</Heading>
+              <FormControl
+                isRequired
+                isInvalid={errors?.email != null}
+                id="email"
+              >
+                <FormLabel>Email Address</FormLabel>
+                <Input
+                  type="email"
+                  placeholder="Enter email"
+                  {...register("email", {
+                    required: {
+                      value: true,
+                      message: `Field is required`,
+                    },
+                  })}
+                />
+                <FormErrorMessage>
+                  {errors?.email && errors?.email?.message}
+                </FormErrorMessage>
+              </FormControl>
+              <FormControl
+                isRequired
+                isInvalid={errors?.password != null}
+                id="password"
+              >
+                <FormLabel>Password</FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? `text` : `password`}
                     placeholder="Enter password"
-                    required
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: `Field is required`,
+                      },
+                    })}
                   />
-                </div>
-                <br />
-                <div className="text-center">
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-lg text-white"
-                  >
-                    Submit{" "}
-                    {isLoading && (
-                      <div
-                        className="spinner-border text-white spinner-border-sm"
-                        role="status"
-                      ></div>
-                    )}
-                  </button>
-                </div>
-              </form>
-              <br />
-              <div className="text-center">
-                <Link
-                  href="/signup"
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <strong>Don't have an account? Sign Up</strong>
-                </Link>
-              </div>
-            </div>
+                  <InputRightElement
+                    onClick={() => setShowPassword(!showPassword)}
+                    children={
+                      showPassword ? (
+                        <ViewOffIcon fontSize={20} color="blue.700" />
+                      ) : (
+                        <ViewIcon fontSize={20} color="blue.700" />
+                      )
+                    }
+                  />
+                </InputGroup>
+                <FormErrorMessage>
+                  {errors?.password && errors?.password?.message}
+                </FormErrorMessage>
+              </FormControl>
+              <Button
+                bg={"blue.800"}
+                color={"white"}
+                mt={4}
+                _hover={{
+                  bg: "blue.900",
+                }}
+                isLoading={isLoading}
+                onClick={() => {
+                  submitSignIn();
+                }}
+                w={"100%"}
+              >
+                Login
+              </Button>
+
+              <Text size={"sm"}>
+                Dont have an account?{" "}
+                <Text as="span" size={"sm"} color={"blue.700"}>
+                  <Link href={"/signup"}>Sign up</Link>
+                </Text>
+              </Text>
+            </VStack>
           </div>
         </div>
       </div>

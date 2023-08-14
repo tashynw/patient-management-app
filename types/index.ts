@@ -36,12 +36,12 @@ export type CreateUserInput = {
   email: string;
   password: string;
   ipAddress: string;
-}
+};
 
 export type LoginUserInput = {
   email: string;
   password: string;
-}
+};
 
 export type CreateAppointmentInput = {
   doctorId: string;
@@ -49,15 +49,15 @@ export type CreateAppointmentInput = {
   date: string;
   time: string;
   description: string;
-}
+};
 
-export const AppointmentFetchQueries: { [key: string]: string; } = {
+export const AppointmentFetchQueries: { [key: string]: string } = {
   PENDING: "Pending",
   REJECTED: "Rejected",
-  ACCEPTED: "Accepted"
-}
+  ACCEPTED: "Accepted",
+};
 
 export type FetchAppointmentInput = {
   patientId: string;
   appointmentStatus: string;
-}
+};
