@@ -1,7 +1,21 @@
 import { useRouter } from "next/router";
 import React from "react";
-import { HiOutlineUsers } from "react-icons/hi";
-import { AppointmentType, UserType } from "../types/index";
+import NextLink from "next/link";
+import { AppointmentType, UserType, badgeStatusColor } from "../types/index";
+import {
+  Box,
+  Heading,
+  SimpleGrid,
+  VStack,
+  Text,
+  Divider,
+  HStack,
+  Avatar,
+  Badge,
+  Link,
+  Spacer,
+} from "@chakra-ui/react";
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 interface CardProps {
   cards: AppointmentType[];
@@ -9,43 +23,73 @@ interface CardProps {
 }
 
 const Cards: React.FC<CardProps> = (props: CardProps) => {
-  const router = useRouter();
   return (
-    <div className="row mt-4 justify-content-start">
+    <SimpleGrid w="100%" gap={5} spacing={5} columns={[1, 2, 3]}>
       {props?.cards?.map((card) => (
-        <div
-          className="appointment-card"
-          style={{ cursor: "pointer" }}
+        <Box
+          bg="white"
+          borderRadius={10}
+          p={5}
+          w="100%"
           key={card?.appointmentId}
-          onClick={() => router.push(`/appointment/${card?.appointmentId}`)}
+          boxShadow="lg"
         >
-          <div className="card-header">
-            <div className="icon-container">
-              <HiOutlineUsers size={25} color="#23A6F0" />
-            </div>
+          <HStack w="100%" alignItems="center">
+            <Badge colorScheme={badgeStatusColor[card?.appointmentStatus]}>
+              {card?.appointmentStatus}
+            </Badge>
+            <Spacer />
+            <Link href={`/appointment/${card?.appointmentId}`} as={NextLink}>
+              <ExternalLinkIcon mx="2px" />
+            </Link>
+          </HStack>
+
+          <VStack w="100%" alignItems="flex-start" mt={4}>
+            <Link href={`/appointment/${card?.appointmentId}`} as={NextLink}>
+              <Text fontSize="16px" fontWeight={500} noOfLines={1}>
+                {card?.description}
+              </Text>
+            </Link>
+            <Text fontSize="14px" color="gray.600" noOfLines={1}>
+              Date: {card?.date}
+            </Text>
+            <Text fontSize="14px" color="gray.600" noOfLines={1}>
+              Time: {card?.time}
+            </Text>
+          </VStack>
+
+          <Divider />
+
+          <VStack gap={1} w="100" alignItems="flex-start">
             {props?.pageSession?.role == "Patient" ? (
-              <p>Dr. {card.doctorId}</p>
+              <>
+                <Heading size="sm" fontWeight={500} color="gray.600">
+                  Doctor
+                </Heading>
+                <HStack w="100%">
+                  <Avatar size="sm" name={card?.doctorId} />
+                  <Heading size="sm" fontWeight={500}>
+                    Dr. {card?.doctorId}
+                  </Heading>
+                </HStack>
+              </>
             ) : (
-              <p>{card.patientId}</p>
+              <>
+                <Heading size="sm" fontWeight={500} color="gray.600">
+                  Patient
+                </Heading>
+                <HStack w="100%">
+                  <Avatar size="sm" name={card?.patientId} />
+                  <Heading size="sm" fontWeight={500}>
+                    {card?.patientId}
+                  </Heading>
+                </HStack>
+              </>
             )}
-          </div>
-          <div className="card-description">
-            <p className="text-muted">
-              <strong>Date: {card?.date}</strong>
-            </p>
-            <p className="text-muted">
-              <strong>Time: {card?.time}</strong>
-            </p>
-            <p className="text-muted description-text">
-              <strong>{card?.description}</strong>
-            </p>
-            <p className="text-primary">
-              <strong>Status: {card?.appointmentStatus}</strong>
-            </p>
-          </div>
-        </div>
+          </VStack>
+        </Box>
       ))}
-    </div>
+    </SimpleGrid>
   );
 };
 

@@ -57,6 +57,12 @@ export const AppointmentFetchQueries: { [key: string]: string } = {
   ACCEPTED: "Accepted",
 };
 
+export const badgeStatusColor: { [key: string]: string } = {
+  Pending: "blue",
+  Rejected: "red",
+  Accepted: "green",
+};
+
 export type FetchAppointmentInput = {
   patientId: string;
   appointmentStatus: string;

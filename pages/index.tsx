@@ -10,6 +10,16 @@ import {
   getUser,
 } from "../utils/apiService";
 import { AppointmentType, UserType } from "../types";
+import {
+  Avatar,
+  Box,
+  Button,
+  HStack,
+  Heading,
+  Spacer,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 
 interface HomePageProps {
   acceptedCards: AppointmentType[];
@@ -25,22 +35,36 @@ export default function Home(props: HomePageProps) {
     <div>
       <NavBar pageSession={props?.pageSession} />
       <div className="container">
-        <div className="h-100 d-flex justify-content-between align-items-center mt-5">
-          <h2>Hello {props?.pageSession?.firstName}!</h2>
-          <button
-            className="btn btn-primary btn-lg"
-            style={{ color: "white" }}
+        <HStack
+          w="100%"
+          mt={5}
+          flexDir={["column", "row", "row"]}
+          alignItems={["flex-start", "center", "center"]}
+        >
+          <VStack alignItems="flex-start">
+            <Heading fontWeight="medium">
+              Hello {props?.pageSession?.firstName}!
+            </Heading>
+            <Text color="gray.600">{new Date().toDateString()}</Text>
+          </VStack>
+          <Spacer />
+          <Button
+            size="md"
+            bg="blue.800"
+            color="white"
             onClick={() => router.push("/book")}
           >
-            Book an appointment
-          </button>
-        </div>
-        <CardsContainer
-          acceptedCards={props?.acceptedCards}
-          pendingCards={props?.pendingCards}
-          rejectedCards={props?.rejectedCards}
-          pageSession={props?.pageSession}
-        />
+            Book Appointment
+          </Button>
+        </HStack>
+        <Box mb={10}>
+          <CardsContainer
+            acceptedCards={props?.acceptedCards}
+            pendingCards={props?.pendingCards}
+            rejectedCards={props?.rejectedCards}
+            pageSession={props?.pageSession}
+          />
+        </Box>
       </div>
     </div>
   );

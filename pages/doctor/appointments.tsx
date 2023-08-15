@@ -10,6 +10,7 @@ import {
   getUser,
 } from "../../utils/apiService";
 import { authOptions } from "../api/auth/[...nextauth]";
+import { Box } from "@chakra-ui/react";
 
 interface DoctorAppointmentPageProps {
   pageSession: UserType;
@@ -27,12 +28,14 @@ const DoctorAppointmentsPage = (props: DoctorAppointmentPageProps) => {
           <h2>Appointments</h2>
         </div>
         <br />
-        <CardsContainer
-          acceptedCards={props?.acceptedCards}
-          pendingCards={props?.pendingCards}
-          rejectedCards={props?.rejectedCards}
-          pageSession={props?.pageSession}
-        />
+        <Box mb={10}>
+          <CardsContainer
+            acceptedCards={props?.acceptedCards}
+            pendingCards={props?.pendingCards}
+            rejectedCards={props?.rejectedCards}
+            pageSession={props?.pageSession}
+          />
+        </Box>
       </div>
     </>
   );
