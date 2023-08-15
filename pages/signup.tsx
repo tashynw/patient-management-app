@@ -49,7 +49,7 @@ export default function SignUpPage(props: SignUpPageProps) {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm<SignupForm>({ resolver: zodResolver(SignupFormSchema) });
+  } = useForm<SignupForm>();
   const submitSignUp = handleSubmit(async (values) => {
     try {
       setIsLoading(true);
@@ -136,61 +136,6 @@ export default function SignUpPage(props: SignUpPageProps) {
     }
   });
 
-  // const handleSignUpForm = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   try {
-  //     e.preventDefault();
-  //     setIsLoading(true);
-  //     if (password != confirmPassword) {
-  //       setIsLoading(false);
-  //       return setPasswordMismatch(true);
-  //     }
-  //     if (
-  //       !new RegExp("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(
-  //         password
-  //       )
-  //     ) {
-  //       setIsLoading(false);
-  //       return setMatchPasswordRegex(false);
-  //     }
-
-  //     const currentUser = await getUserFromEmail(email).catch((e) => {});
-  //     if (currentUser) {
-  //       setIsLoading(false);
-  //       return toast.error("Email already taken - try again");
-  //     }
-
-  //     const ipAddress: string = await getIpAddress();
-  //     if (isDoctor) {
-  //       const passCode: string = process.env.NEXT_PUBLIC_DOCTOR_CODE || "";
-  //       if (doctorPassword != passCode) {
-  //         setIsLoading(false);
-  //         return toast.error("Incorrect doctor code");
-  //       }
-  //       await createDoctor({ firstName, lastName, email, password, ipAddress });
-  //       const loginStatus = await signIn("credentials", {
-  //         email,
-  //         password,
-  //         redirect: false,
-  //       });
-  //       if (!loginStatus?.ok) return toast.error("Sign in failed");
-  //       setIsLoading(false);
-  //       toast.success("Account created successfully");
-  //       return router.push("/doctor");
-  //     }
-  //     await createUser({ firstName, lastName, email, password, ipAddress });
-  //     const loginStatus = await signIn("credentials", {
-  //       email,
-  //       password,
-  //       redirect: false,
-  //     });
-  //     if (!loginStatus?.ok) return toast.error("Sign in failed");
-  //     setIsLoading(false);
-  //     toast.success("Account created successfully");
-  //     router.push("/");
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
   return (
     <div
       className="bg-image"
@@ -259,6 +204,11 @@ export default function SignUpPage(props: SignUpPageProps) {
                     value: true,
                     message: `Field is required`,
                   },
+                  pattern: {
+                    value:
+                      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                    message: "Email is invalid",
+                  },
                 })}
               />
               <FormErrorMessage>
@@ -276,6 +226,21 @@ export default function SignUpPage(props: SignUpPageProps) {
                       required: {
                         value: true,
                         message: `Field is required`,
+                      },
+                      validate: (value) => {
+                        if (value != getValues("confirmPassword")) {
+                          return "Passwords must match";
+                        }
+                      },
+                      maxLength: {
+                        value: 50,
+                        message: `Password too long`,
+                      },
+                      pattern: {
+                        value:
+                          /^(?=\S*[a-z])(?=\S*[A-Z])(?=\S*\d)(?=\S*[^\w\s])\S{8,}$/,
+                        message:
+                          "Password should be minimum eight characters, at least one uppercase letter, one lowercase letter and one number",
                       },
                     })}
                   />
@@ -378,134 +343,6 @@ export default function SignUpPage(props: SignUpPageProps) {
               </Text>
             </Text>
           </VStack>
-          {/* <div className="w-20 p-4 bg-white rounded-3">
-            <h4 className="text-center">Sign Up</h4>
-            <br />
-            <form>
-              <div className="form-group">
-                <label>First Name</label>
-                <input
-                  type="text"
-                  className="form-control mt-2"
-                  placeholder="Enter First Name"
-                  required
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Last Name</label>
-                <input
-                  type="text"
-                  className="form-control mt-2"
-                  placeholder="Enter Last Name"
-                  required
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  className="form-control mt-2"
-                  placeholder="Enter email"
-                  required
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  className={
-                    matchPasswordRegex
-                      ? "form-control mt-2"
-                      : "form-control mt-2 is-invalid"
-                  }
-                  placeholder="Enter password"
-                  required
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {!matchPasswordRegex && (
-                  <div className="invalid-feedback">
-                    Minimum of eight characters, at least one letter, number and
-                    special character.
-                  </div>
-                )}
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Confirm Password</label>
-                <input
-                  type="password"
-                  className={
-                    !passwordMismatch
-                      ? "form-control mt-2"
-                      : "form-control mt-2 is-invalid"
-                  }
-                  placeholder="Confirm password"
-                  required
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                {passwordMismatch && (
-                  <div className="invalid-feedback">
-                    The password does not match.
-                  </div>
-                )}
-              </div>
-              <br />
-              {isDoctor && (
-                <div className="form-group">
-                  <label>Enter Doctor's code</label>
-                  <input
-                    type="password"
-                    className="form-control mt-2"
-                    placeholder="Enter password"
-                    required
-                    onChange={(e) => setDoctorPassword(e.target.value)}
-                  />
-                </div>
-              )}
-              <br />
-              <div className="form-check">
-                <label className="form-check-label">
-                  Are you a Doctor?
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={isDoctor}
-                    onChange={() => setIsDoctor(!isDoctor)}
-                  />
-                </label>
-              </div>
-              <br />
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-lg text-white"
-                >
-                  Start Today!{" "}
-                  {isLoading && (
-                    <div
-                      className="spinner-border text-white spinner-border-sm"
-                      role="status"
-                    ></div>
-                  )}
-                </button>
-              </div>
-            </form>
-            <br />
-            <div className="text-center">
-              <Link
-                href="/login"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <strong>Already have an account? Login</strong>
-              </Link>
-            </div>
-          </div> */}
         </div>
       </div>
     </div>
