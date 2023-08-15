@@ -1,4 +1,3 @@
-import { unstable_getServerSession } from "next-auth";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -23,6 +22,7 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { LoginForm, LoginFormSchema } from "../types/Authentication";
+import { getServerSession } from "next-auth/next";
 
 interface LoginPageProps {
   pageSession: UserType;
@@ -187,7 +187,7 @@ export default function LoginPage(props: LoginPageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions

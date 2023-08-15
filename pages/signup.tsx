@@ -9,7 +9,6 @@ import {
   getUserFromEmail,
 } from "../utils/apiService";
 import { useRouter } from "next/router";
-import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { UserType } from "../types";
 import {
@@ -31,6 +30,7 @@ import { SignupForm, SignupFormSchema } from "../types/Authentication";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { getServerSession } from "next-auth/next";
 
 interface SignUpPageProps {
   pageSession: UserType;
@@ -350,7 +350,7 @@ export default function SignUpPage(props: SignUpPageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions

@@ -5,11 +5,7 @@ export const LoginFormSchema = z.object({
   password: z
     .string()
     .min(8, "Password too short")
-    .max(50, "Password too long")
-    .regex(
-      /^(?=\S*[a-z])(?=\S*[A-Z])(?=\S*\d)(?=\S*[^\w\s])\S{8,}$/,
-      "Password should be minimum eight characters, at least one uppercase letter, one lowercase letter and one number"
-    ),
+    .max(50, "Password too long"),
 });
 
 export type LoginForm = z.infer<typeof LoginFormSchema>;

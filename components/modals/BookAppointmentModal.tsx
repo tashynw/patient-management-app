@@ -160,6 +160,7 @@ const BookAppointmentModal = ({
             <FormControl isRequired isInvalid={errors?.description != null}>
               <FormLabel>Description</FormLabel>
               <Textarea
+                size="md"
                 {...register("description", {
                   required: {
                     value: true,

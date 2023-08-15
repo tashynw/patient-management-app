@@ -1,4 +1,3 @@
-import { unstable_getServerSession } from "next-auth";
 import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
@@ -7,6 +6,7 @@ import NavBar from "../components/navbar";
 import { UserType } from "../types";
 import { deleteUser, updateUser } from "../utils/apiService";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { getServerSession } from "next-auth/next";
 
 interface ProfilePageProps {
   pageSession: UserType;
@@ -33,7 +33,8 @@ export default function ProfilePage({ pageSession }: ProfilePageProps) {
       setIsLoading(true);
       if (!pageSession?.userId) return;
       const response = await deleteUser(pageSession?.userId);
-      if (!response) return toast.error("Account and appointments failed to delete");
+      if (!response)
+        return toast.error("Account and appointments failed to delete");
       setIsLoading(false);
       signOut();
       toast.success("Account and appointments successfully deleted");
@@ -145,7 +146,7 @@ export default function ProfilePage({ pageSession }: ProfilePageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions

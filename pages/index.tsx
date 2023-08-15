@@ -26,7 +26,6 @@ interface HomePageProps {
 }
 
 export default function Home({ pageSession, doctors }: HomePageProps) {
-  const router = useRouter();
   const toast = useToast();
   const {
     isOpen: isBookAppointmentOpen,

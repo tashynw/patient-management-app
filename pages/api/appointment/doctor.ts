@@ -17,8 +17,8 @@ export default async function handler(
       return res.status(401).json({ message: "Not signed in" });
     }
 
-    const patientId = req.query.patientId;
-    if (!patientId)
+    const doctorId = req.query.doctorId;
+    if (!doctorId)
       return res.status(400).json({ message: "Invalid request body" });
 
     await dbConnect();
@@ -29,7 +29,7 @@ export default async function handler(
       rejectedCards: [],
     };
     const appointments = await Appointment.find({
-      patientId,
+      doctorId,
     }).exec();
     if (!appointments) return res.status(200).json(response);
 

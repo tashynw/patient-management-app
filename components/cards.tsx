@@ -20,6 +20,8 @@ import { ExternalLinkIcon } from "@chakra-ui/icons";
 interface CardProps {
   cards: AppointmentType[];
   pageSession: UserType;
+  setSelectedAppointment: any;
+  onViewAppointmentOpen: any;
 }
 
 const Cards: React.FC<CardProps> = (props: CardProps) => {
@@ -39,17 +41,30 @@ const Cards: React.FC<CardProps> = (props: CardProps) => {
               {card?.appointmentStatus}
             </Badge>
             <Spacer />
-            <Link href={`/appointment/${card?.appointmentId}`} as={NextLink}>
-              <ExternalLinkIcon mx="2px" />
-            </Link>
+
+            <ExternalLinkIcon
+              cursor="pointer"
+              onClick={() => {
+                props?.setSelectedAppointment(card);
+                props?.onViewAppointmentOpen();
+              }}
+              mx="2px"
+            />
           </HStack>
 
           <VStack w="100%" alignItems="flex-start" mt={4}>
-            <Link href={`/appointment/${card?.appointmentId}`} as={NextLink}>
-              <Text fontSize="16px" fontWeight={500} noOfLines={1}>
-                {card?.description}
-              </Text>
-            </Link>
+            <Text
+              fontSize="16px"
+              fontWeight={500}
+              noOfLines={1}
+              cursor="pointer"
+              onClick={() => {
+                props?.setSelectedAppointment(card);
+                props?.onViewAppointmentOpen();
+              }}
+            >
+              {card?.description}
+            </Text>
             <Text fontSize="14px" color="gray.600" noOfLines={1}>
               Date: {new Date(card?.date).toDateString()}
             </Text>

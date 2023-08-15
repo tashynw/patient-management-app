@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { AppointmentType, UserType } from "../types";
 import Cards from "./cards";
-import { Center, Heading, Text } from "@chakra-ui/react";
+import { Center, Heading, Text, useDisclosure } from "@chakra-ui/react";
+import ViewAppointmentDrawer from "./drawers/ViewAppointmentDrawer";
 
 interface CardsContainerProps {
   acceptedCards: AppointmentType[];
@@ -11,13 +12,26 @@ interface CardsContainerProps {
 }
 
 const CardsContainer = (props: CardsContainerProps) => {
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<AppointmentType>();
+  const {
+    isOpen: isViewAppointmentOpen,
+    onOpen: onViewAppointmentOpen,
+    onClose: onViewAppointmentClose,
+  } = useDisclosure();
+
   function AcceptedAppointments() {
     return props?.acceptedCards?.length ? (
       <>
         <Text fontSize="larger" fontWeight="medium" color="gray.600" mt={8}>
           Accepted Appointments
         </Text>
-        <Cards cards={props?.acceptedCards} pageSession={props?.pageSession} />
+        <Cards
+          cards={props?.acceptedCards}
+          pageSession={props?.pageSession}
+          onViewAppointmentOpen={onViewAppointmentOpen}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </>
     ) : null;
   }
@@ -28,7 +42,12 @@ const CardsContainer = (props: CardsContainerProps) => {
         <Text fontSize="larger" fontWeight="medium" color="gray.600" mt={8}>
           Pending Appointments
         </Text>
-        <Cards cards={props?.pendingCards} pageSession={props?.pageSession} />
+        <Cards
+          cards={props?.pendingCards}
+          pageSession={props?.pageSession}
+          onViewAppointmentOpen={onViewAppointmentOpen}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </>
     ) : null;
   }
@@ -39,7 +58,12 @@ const CardsContainer = (props: CardsContainerProps) => {
         <Text fontSize="larger" fontWeight="medium" color="gray.600" mt={8}>
           Rejected Appointments
         </Text>
-        <Cards cards={props?.rejectedCards} pageSession={props?.pageSession} />
+        <Cards
+          cards={props?.rejectedCards}
+          pageSession={props?.pageSession}
+          onViewAppointmentOpen={onViewAppointmentOpen}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </>
     ) : null;
   }
@@ -65,6 +89,12 @@ const CardsContainer = (props: CardsContainerProps) => {
       <AcceptedAppointments />
       <PendingAppointments />
       <RejectedAppointments />
+      <ViewAppointmentDrawer
+        isOpen={isViewAppointmentOpen}
+        onClose={onViewAppointmentClose}
+        appointment={selectedAppointment!}
+        pageSession={props?.pageSession}
+      />
     </>
   );
 };

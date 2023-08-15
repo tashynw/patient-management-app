@@ -1,16 +1,12 @@
-import { unstable_getServerSession } from "next-auth";
 import React from "react";
 import CardsContainer from "../../components/cards-container";
 import NavBar from "../../components/navbar";
 import { AppointmentType, UserType } from "../../types";
-import {
-  getAccceptedAppointmentsForDoctor,
-  getPendingAppointmentsForDoctor,
-  getRejectedAppointmentsForDoctor,
-  getUser,
-} from "../../utils/apiService";
+import { getDoctorAppointments } from "../../utils/apiService";
 import { authOptions } from "../api/auth/[...nextauth]";
-import { Box } from "@chakra-ui/react";
+import { Box, SkeletonText, useToast } from "@chakra-ui/react";
+import { getServerSession } from "next-auth/next";
+import { useQuery } from "react-query";
 
 interface DoctorAppointmentPageProps {
   pageSession: UserType;
@@ -19,23 +15,45 @@ interface DoctorAppointmentPageProps {
   rejectedCards: AppointmentType[];
 }
 
-const DoctorAppointmentsPage = (props: DoctorAppointmentPageProps) => {
+const DoctorAppointmentsPage = ({
+  pageSession,
+}: DoctorAppointmentPageProps) => {
+  const toast = useToast();
+  const { data: appointments, isLoading } = useQuery(
+    "appointments",
+    () => getDoctorAppointments(pageSession?.userId),
+    {
+      onError(err) {
+        toast({
+          title: `Error`,
+          description: "Error fetching appointments.",
+          status: "error",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+      },
+    }
+  );
+
   return (
     <>
-      <NavBar pageSession={props?.pageSession} />
+      <NavBar pageSession={pageSession} />
       <div className="container">
         <div className="h-100 d-flex justify-content-between align-items-center mt-5">
           <h2>Appointments</h2>
         </div>
         <br />
-        <Box mb={10}>
-          <CardsContainer
-            acceptedCards={props?.acceptedCards}
-            pendingCards={props?.pendingCards}
-            rejectedCards={props?.rejectedCards}
-            pageSession={props?.pageSession}
-          />
-        </Box>
+        <SkeletonText noOfLines={4} isLoaded={!isLoading}>
+          <Box mb={10}>
+            <CardsContainer
+              acceptedCards={appointments?.acceptedCards!}
+              pendingCards={appointments?.pendingCards!}
+              rejectedCards={appointments?.rejectedCards!}
+              pageSession={pageSession}
+            />
+          </Box>
+        </SkeletonText>
       </div>
     </>
   );
@@ -44,7 +62,7 @@ const DoctorAppointmentsPage = (props: DoctorAppointmentPageProps) => {
 export default DoctorAppointmentsPage;
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions
@@ -59,32 +77,9 @@ export async function getServerSideProps(context: any) {
     };
   }
 
-  const acceptedCards = await getAccceptedAppointmentsForDoctor(
-    session?.userId
-  );
-  for (let appointment of acceptedCards) {
-    const patient = await getUser(appointment.patientId);
-    appointment.patientId = `${patient?.firstName} ${patient?.lastName}`;
-  }
-
-  const pendingCards = await getPendingAppointmentsForDoctor(session?.userId);
-  for (let appointment of pendingCards) {
-    const patient = await getUser(appointment.patientId);
-    appointment.patientId = `${patient?.firstName} ${patient?.lastName}`;
-  }
-
-  const rejectedCards = await getRejectedAppointmentsForDoctor(session?.userId);
-  for (let appointment of rejectedCards) {
-    const patient = await getUser(appointment.patientId);
-    appointment.patientId = `${patient?.firstName} ${patient?.lastName}`;
-  }
-
   return {
     props: {
       pageSession: JSON.parse(JSON.stringify(session)),
-      acceptedCards: JSON.parse(JSON.stringify(acceptedCards)),
-      pendingCards: JSON.parse(JSON.stringify(pendingCards)),
-      rejectedCards: JSON.parse(JSON.stringify(rejectedCards)),
     },
   };
 }

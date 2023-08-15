@@ -423,9 +423,9 @@ export async function getPatientAppointments(patientId: string) {
     rejectedCards: AppointmentType[];
   };
 }
-export async function getDoctorAppointments(patientId: string) {
+export async function getDoctorAppointments(doctorId: string) {
   const request = await fetch(
-    `${HOST_NAME}/api/appointment/doctor?patientId=${patientId}`,
+    `${HOST_NAME}/api/appointment/doctor?doctorId=${doctorId}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
