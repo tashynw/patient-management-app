@@ -406,3 +406,36 @@ export async function getIpAddress(): Promise<string> {
   const json = await res.json();
   return json.IPv4;
 }
+
+export async function getPatientAppointments(patientId: string) {
+  const request = await fetch(
+    `${HOST_NAME}/api/appointment/patient?patientId=${patientId}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const appointments = await request.json();
+  return appointments as {
+    acceptedCards: AppointmentType[];
+    pendingCards: AppointmentType[];
+    rejectedCards: AppointmentType[];
+  };
+}
+export async function getDoctorAppointments(patientId: string) {
+  const request = await fetch(
+    `${HOST_NAME}/api/appointment/doctor?patientId=${patientId}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const appointments = await request.json();
+  return appointments as {
+    acceptedCards: AppointmentType[];
+    pendingCards: AppointmentType[];
+    rejectedCards: AppointmentType[];
+  };
+}

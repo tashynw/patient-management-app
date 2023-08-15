@@ -51,7 +51,7 @@ const Cards: React.FC<CardProps> = (props: CardProps) => {
               </Text>
             </Link>
             <Text fontSize="14px" color="gray.600" noOfLines={1}>
-              Date: {card?.date}
+              Date: {new Date(card?.date).toDateString()}
             </Text>
             <Text fontSize="14px" color="gray.600" noOfLines={1}>
               Time: {card?.time}

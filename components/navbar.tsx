@@ -62,12 +62,6 @@ const NavBar = ({ pageSession }: NavbarProps) => {
                   </Nav.Link>
                   <Nav.Link
                     className="m-3 text-white"
-                    onClick={() => router.push("/book")}
-                  >
-                    <Heading size="sm">Add Appointment</Heading>
-                  </Nav.Link>
-                  <Nav.Link
-                    className="m-3 text-white"
                     onClick={() => router.push("/profile")}
                   >
                     <Heading size="sm">View Profile</Heading>

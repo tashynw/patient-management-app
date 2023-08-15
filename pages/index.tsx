@@ -1,39 +1,58 @@
 import NavBar from "../components/navbar";
-import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { useRouter } from "next/router";
 import CardsContainer from "../components/cards-container";
+import { UserType } from "../types";
 import {
-  getAcceptedAppointments,
-  getPendingAppointments,
-  getRejectedAppointments,
-  getUser,
-} from "../utils/apiService";
-import { AppointmentType, UserType } from "../types";
-import {
-  Avatar,
   Box,
   Button,
   HStack,
   Heading,
+  SkeletonText,
   Spacer,
   Text,
   VStack,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
+import { getServerSession } from "next-auth/next";
+import { useQuery } from "react-query";
+import { getAllDoctors, getPatientAppointments } from "../utils/apiService";
+import BookAppointmentModal from "../components/modals/BookAppointmentModal";
 
 interface HomePageProps {
-  acceptedCards: AppointmentType[];
-  pendingCards: AppointmentType[];
-  rejectedCards: AppointmentType[];
   pageSession: UserType;
+  doctors: UserType[];
 }
 
-export default function Home(props: HomePageProps) {
+export default function Home({ pageSession, doctors }: HomePageProps) {
   const router = useRouter();
+  const toast = useToast();
+  const {
+    isOpen: isBookAppointmentOpen,
+    onOpen: onBookAppointmentOpen,
+    onClose: onBookAppointmentClose,
+  } = useDisclosure();
+  const { data: appointments, isLoading } = useQuery(
+    "appointments",
+    () => getPatientAppointments(pageSession?.userId),
+    {
+      onError(err) {
+        toast({
+          title: `Error`,
+          description: "Error fetching appointments.",
+          status: "error",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+      },
+    }
+  );
 
   return (
     <div>
-      <NavBar pageSession={props?.pageSession} />
+      <NavBar pageSession={pageSession} />
       <div className="container">
         <HStack
           w="100%"
@@ -43,7 +62,7 @@ export default function Home(props: HomePageProps) {
         >
           <VStack alignItems="flex-start">
             <Heading fontWeight="medium">
-              Hello {props?.pageSession?.firstName}!
+              Hello {pageSession?.firstName}!
             </Heading>
             <Text color="gray.600">{new Date().toDateString()}</Text>
           </VStack>
@@ -52,26 +71,37 @@ export default function Home(props: HomePageProps) {
             size="md"
             bg="blue.800"
             color="white"
-            onClick={() => router.push("/book")}
+            onClick={() => onBookAppointmentOpen()}
+            _hover={{
+              bg: "blue.900",
+            }}
           >
             Book Appointment
           </Button>
         </HStack>
-        <Box mb={10}>
-          <CardsContainer
-            acceptedCards={props?.acceptedCards}
-            pendingCards={props?.pendingCards}
-            rejectedCards={props?.rejectedCards}
-            pageSession={props?.pageSession}
-          />
-        </Box>
+        <SkeletonText noOfLines={4} isLoaded={!isLoading}>
+          <Box mb={10}>
+            <CardsContainer
+              acceptedCards={appointments?.acceptedCards!}
+              pendingCards={appointments?.pendingCards!}
+              rejectedCards={appointments?.rejectedCards!}
+              pageSession={pageSession}
+            />
+          </Box>
+        </SkeletonText>
       </div>
+      <BookAppointmentModal
+        isOpen={isBookAppointmentOpen}
+        onClose={onBookAppointmentClose}
+        doctors={doctors}
+        userId={pageSession?.userId}
+      />
     </div>
   );
 }
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions
@@ -85,31 +115,11 @@ export async function getServerSideProps(context: any) {
       },
     };
   }
-
-  const acceptedCards = await getAcceptedAppointments(session?.userId);
-  for (let appointment of acceptedCards) {
-    const doctor = await getUser(appointment.doctorId);
-    appointment.doctorId = doctor?.lastName;
-  }
-
-  const pendingCards = await getPendingAppointments(session?.userId);
-  for (let appointment of pendingCards) {
-    const doctor = await getUser(appointment.doctorId);
-    appointment.doctorId = doctor?.lastName;
-  }
-
-  const rejectedCards = await getRejectedAppointments(session?.userId);
-  for (let appointment of rejectedCards) {
-    const doctor = await getUser(appointment.doctorId);
-    appointment.doctorId = doctor?.lastName;
-  }
-
+  const doctors = await getAllDoctors();
   return {
     props: {
       pageSession: JSON.parse(JSON.stringify(session)),
-      acceptedCards: JSON.parse(JSON.stringify(acceptedCards)),
-      pendingCards: JSON.parse(JSON.stringify(pendingCards)),
-      rejectedCards: JSON.parse(JSON.stringify(rejectedCards)),
+      doctors: JSON.parse(JSON.stringify(doctors)),
     },
   };
 }
