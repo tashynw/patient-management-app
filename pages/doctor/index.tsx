@@ -9,6 +9,17 @@ import {
 } from "../../utils/apiService";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { getServerSession } from "next-auth/next";
+import {
+  Heading,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  VStack,
+} from "@chakra-ui/react";
+import AppointmentTable from "../../components/doctorManagement/AppointmentTable";
+import PatientTable from "../../components/doctorManagement/PatientTable";
 
 interface DoctorPageProps {
   pageSession: UserType;
@@ -43,74 +54,26 @@ const DoctorPage = (props: DoctorPageProps) => {
     <>
       <NavBar pageSession={props?.pageSession} />
       <div className="container">
-        <div className="h-100 d-flex justify-content-between align-items-center mt-5">
-          <h2>Doctor Management</h2>
-        </div>
-        <br />
-        <br />
-        <form onSubmit={handleSubmit}>
-          <div className="form-group w-50">
-            <div
-              className="input-group d-flex align-items-center"
-              style={{ gap: "10px" }}
-            >
-              <label>Enter Patient's First Name</label>
-              <input
-                type="search"
-                className="form-control"
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-              <button className="btn btn-primary text-white w-15">
-                Search
-              </button>
-            </div>
-          </div>
-          <br />
-        </form>
-        <button
-          className="btn btn-primary text-white"
-          onClick={loadAllPatients}
-        >
-          View All Patients
-        </button>
-        <br />
-        <br />
-        <div className="table-responsive">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th scope="col">FirstName</th>
-                <th scope="col">LastName</th>
-                <th scope="col">Age</th>
-                <th scope="col">Number</th>
-                <th scope="col">Address</th>
-                <th scope="col">Appointments</th>
-              </tr>
-            </thead>
-            <tbody>
-              {patients?.map((patient) => (
-                <tr key={patient?.userId}>
-                  <td>{patient?.firstName}</td>
-                  <td>{patient?.lastName}</td>
-                  <td>{!patient?.age ? "" : patient?.age}</td>
-                  <td>{patient?.phoneNumber}</td>
-                  <td>{patient?.address}</td>
-                  <td>
-                    {patient?.appointments?.map((appointment, i) => (
-                      <Link
-                        href={`/appointment/${appointment?.appointmentId}`}
-                        key={appointment?.appointmentId}
-                      >
-                        {`Appointment ${i + 1}\n\n`}
-                      </Link>
-                    ))}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <VStack w="100%" alignItems="flex-start" mt={7} gap={7}>
+          <Heading fontWeight="medium">Doctor Management</Heading>
+          <Tabs w="100%">
+            <TabList>
+              <Tab>Appointments</Tab>
+              <Tab>Patients</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <AppointmentTable />
+              </TabPanel>
+              <TabPanel>
+                <PatientTable />
+              </TabPanel>
+              <TabPanel>
+                <AppointmentTable />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </VStack>
       </div>
     </>
   );

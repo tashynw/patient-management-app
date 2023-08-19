@@ -88,3 +88,9 @@ body {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.rdt_TableCol div:first-child {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+

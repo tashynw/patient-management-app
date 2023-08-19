@@ -15,11 +15,11 @@ export default async function handler(
 ) {
   await dbConnect();
   const { email } = req.body;
-    if(!email) return res.status(400).json({ message: "Invalid request body" });
+  if (!email) return res.status(400).json({ message: "Invalid request body" });
   try {
-    const user: UserType = await User.findOne({ email }).exec();
+    const user: any = await User.findOne({ email }).exec();
     if (!user) return res.status(400).json({ message: "User not found" });
-    user.password="";
+    user.password = undefined;
     return res.status(200).json({ body: user });
   } catch (e) {
     console.log(`Error get user: ${e}`);

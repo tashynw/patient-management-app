@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
       const userInformation = await User.findOne({
         email: session.user?.email,
       }).exec();
-      userInformation.password = "👀";
+      userInformation.password = undefined;
 
       return userInformation;
     },
@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
 
           const user: any = await response.json();
           if (!response.ok || !user) return null;
-          user.body.password = "👀";
+          user.body.password = undefined;
           return {
             id: user.body.userId,
             name: `${user.body.firstName} ${user.body.lastName}`,

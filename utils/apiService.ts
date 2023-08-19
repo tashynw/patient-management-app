@@ -439,3 +439,15 @@ export async function getDoctorAppointments(doctorId: string) {
     rejectedCards: AppointmentType[];
   };
 }
+
+export async function getAllAppointmentsInSystem() {
+  const request = await fetch(`${HOST_NAME}/api/appointment/all`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!request.ok)
+    throw new Error("An error occurred while fetching the appointments");
+
+  const appointments = await request.json();
+  return appointments as AppointmentType[];
+}
