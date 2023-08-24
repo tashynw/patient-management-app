@@ -67,3 +67,9 @@ export type FetchAppointmentInput = {
   patientId: string;
   appointmentStatus: string;
 };
+
+export type EditUserProfileForm = {
+  age: string;
+  phoneNumber: string;
+  address: string;
+};

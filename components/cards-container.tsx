@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AppointmentType, UserType } from "../types";
 import Cards from "./cards";
-import { Center, Heading, Text, useDisclosure } from "@chakra-ui/react";
+import { Center, Heading, Text, VStack, useDisclosure } from "@chakra-ui/react";
 import ViewAppointmentDrawer from "./drawers/ViewAppointmentDrawer";
 
 interface CardsContainerProps {
@@ -86,9 +86,11 @@ const CardsContainer = (props: CardsContainerProps) => {
           </Center>
         </div>
       )}
-      <AcceptedAppointments />
-      <PendingAppointments />
-      <RejectedAppointments />
+      <VStack w="100%" alignItems="flex-start" gap={5}>
+        <AcceptedAppointments />
+        <PendingAppointments />
+        <RejectedAppointments />
+      </VStack>
       <ViewAppointmentDrawer
         isOpen={isViewAppointmentOpen}
         onClose={onViewAppointmentClose}

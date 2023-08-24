@@ -64,7 +64,7 @@ const NavBar = ({ pageSession }: NavbarProps) => {
                     className="m-3 text-white"
                     onClick={() => router.push("/profile")}
                   >
-                    <Heading size="sm">View Profile</Heading>
+                    <Heading size="sm">Profile</Heading>
                   </Nav.Link>
                   <Nav.Link className="m-3 text-white" onClick={handleSignOut}>
                     <Heading size="sm">Sign Out</Heading>

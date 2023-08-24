@@ -36,21 +36,9 @@ const Cards: React.FC<CardProps> = (props: CardProps) => {
           key={card?.appointmentId}
           boxShadow="lg"
         >
-          <HStack w="100%" alignItems="center">
-            <Badge colorScheme={badgeStatusColor[card?.appointmentStatus]}>
-              {card?.appointmentStatus}
-            </Badge>
-            <Spacer />
-
-            <ExternalLinkIcon
-              cursor="pointer"
-              onClick={() => {
-                props?.setSelectedAppointment(card);
-                props?.onViewAppointmentOpen();
-              }}
-              mx="2px"
-            />
-          </HStack>
+          <Badge colorScheme={badgeStatusColor[card?.appointmentStatus]}>
+            {card?.appointmentStatus}
+          </Badge>
 
           <VStack w="100%" alignItems="flex-start" mt={4}>
             <Text
