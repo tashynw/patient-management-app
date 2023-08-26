@@ -143,14 +143,13 @@ export default function LoginPage(props: LoginPageProps) {
                   />
                   <InputRightElement
                     onClick={() => setShowPassword(!showPassword)}
-                    children={
-                      showPassword ? (
-                        <ViewOffIcon fontSize={20} color="blue.700" />
-                      ) : (
-                        <ViewIcon fontSize={20} color="blue.700" />
-                      )
-                    }
-                  />
+                  >
+                    {showPassword ? (
+                      <ViewOffIcon fontSize={20} color="blue.700" />
+                    ) : (
+                      <ViewIcon fontSize={20} color="blue.700" />
+                    )}
+                  </InputRightElement>
                 </InputGroup>
                 <FormErrorMessage>
                   {errors?.password && errors?.password?.message}
