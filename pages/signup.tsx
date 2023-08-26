@@ -246,14 +246,13 @@ export default function SignUpPage(props: SignUpPageProps) {
                   />
                   <InputRightElement
                     onClick={() => setShowPassword(!showPassword)}
-                    children={
-                      showPassword ? (
-                        <ViewOffIcon fontSize={20} color="blue.700" />
-                      ) : (
-                        <ViewIcon fontSize={20} color="blue.700" />
-                      )
-                    }
-                  />
+                  >
+                    {showPassword ? (
+                      <ViewOffIcon fontSize={20} color="blue.700" />
+                    ) : (
+                      <ViewIcon fontSize={20} color="blue.700" />
+                    )}
+                  </InputRightElement>
                 </InputGroup>
                 <FormErrorMessage>
                   {errors?.password && errors?.password?.message}
@@ -281,14 +280,13 @@ export default function SignUpPage(props: SignUpPageProps) {
                   />
                   <InputRightElement
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    children={
-                      showConfirmPassword ? (
-                        <ViewOffIcon fontSize={20} color="blue.700" />
-                      ) : (
-                        <ViewIcon fontSize={20} color="blue.700" />
-                      )
-                    }
-                  />
+                  >
+                    {showConfirmPassword ? (
+                      <ViewOffIcon fontSize={20} color="blue.700" />
+                    ) : (
+                      <ViewIcon fontSize={20} color="blue.700" />
+                    )}
+                  </InputRightElement>
                 </InputGroup>
                 <FormErrorMessage>
                   {errors?.confirmPassword && errors?.confirmPassword?.message}
