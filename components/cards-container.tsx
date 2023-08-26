@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { AppointmentType, UserType } from "../types";
 import Cards from "./cards";
+import { Center, Heading, Text, VStack, useDisclosure } from "@chakra-ui/react";
+import ViewAppointmentDrawer from "./drawers/ViewAppointmentDrawer";
 
 interface CardsContainerProps {
   acceptedCards: AppointmentType[];
@@ -10,11 +12,26 @@ interface CardsContainerProps {
 }
 
 const CardsContainer = (props: CardsContainerProps) => {
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<AppointmentType>();
+  const {
+    isOpen: isViewAppointmentOpen,
+    onOpen: onViewAppointmentOpen,
+    onClose: onViewAppointmentClose,
+  } = useDisclosure();
+
   function AcceptedAppointments() {
     return props?.acceptedCards?.length ? (
       <>
-        <h5 className="mt-5 text-muted">Accepted Appointments</h5>
-        <Cards cards={props?.acceptedCards} pageSession={props?.pageSession} />
+        <Text fontSize="larger" fontWeight="medium" color="gray.600" mt={8}>
+          Accepted Appointments
+        </Text>
+        <Cards
+          cards={props?.acceptedCards}
+          pageSession={props?.pageSession}
+          onViewAppointmentOpen={onViewAppointmentOpen}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </>
     ) : null;
   }
@@ -22,8 +39,15 @@ const CardsContainer = (props: CardsContainerProps) => {
   function PendingAppointments() {
     return props?.pendingCards?.length ? (
       <>
-        <h5 className="mt-5 text-muted">Pending Appointments</h5>
-        <Cards cards={props?.pendingCards} pageSession={props?.pageSession} />
+        <Text fontSize="larger" fontWeight="medium" color="gray.600" mt={8}>
+          Pending Appointments
+        </Text>
+        <Cards
+          cards={props?.pendingCards}
+          pageSession={props?.pageSession}
+          onViewAppointmentOpen={onViewAppointmentOpen}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </>
     ) : null;
   }
@@ -31,24 +55,48 @@ const CardsContainer = (props: CardsContainerProps) => {
   function RejectedAppointments() {
     return props?.rejectedCards?.length ? (
       <>
-        <h5 className="mt-5 text-muted">Rejected Appointments</h5>
-        <Cards cards={props?.rejectedCards} pageSession={props?.pageSession} />
+        <Text fontSize="larger" fontWeight="medium" color="gray.600" mt={8}>
+          Rejected Appointments
+        </Text>
+        <Cards
+          cards={props?.rejectedCards}
+          pageSession={props?.pageSession}
+          onViewAppointmentOpen={onViewAppointmentOpen}
+          setSelectedAppointment={setSelectedAppointment}
+        />
       </>
     ) : null;
   }
 
-  const isEmpty: boolean = (!props?.pendingCards?.length && !props?.acceptedCards?.length && !props?.rejectedCards?.length)
+  const isEmpty: boolean =
+    !props?.pendingCards?.length &&
+    !props?.acceptedCards?.length &&
+    !props?.rejectedCards?.length;
 
   return (
     <>
-      {isEmpty && 
-        <div style={{marginTop:'100px'}}>
-          <h5 className="text-center text-muted mt-5">{props?.pageSession?.role=="Patient" ? `No appointments made. Book an appointment now` : `No patient has booked you for an appointment.`}</h5>
+      {isEmpty && (
+        <div style={{ marginTop: "100px" }}>
+          <Center>
+            <Heading mt={5} size="md" color="gray.600">
+              {props?.pageSession?.role == "Patient"
+                ? `No appointments made. Book an appointment now`
+                : `No patient has booked you for an appointment.`}
+            </Heading>
+          </Center>
         </div>
-      }
-      <AcceptedAppointments />
-      <PendingAppointments />
-      <RejectedAppointments />
+      )}
+      <VStack w="100%" alignItems="flex-start" gap={5}>
+        <AcceptedAppointments />
+        <PendingAppointments />
+        <RejectedAppointments />
+      </VStack>
+      <ViewAppointmentDrawer
+        isOpen={isViewAppointmentOpen}
+        onClose={onViewAppointmentClose}
+        appointment={selectedAppointment!}
+        pageSession={props?.pageSession}
+      />
     </>
   );
 };

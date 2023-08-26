@@ -5,8 +5,11 @@ import { sendDoctorRequestEmail } from "../../../../emails/doctor_request_email/
 import Appointment from "../../../../models/Appointment";
 import User from "../../../../models/User";
 import { AppointmentType, UserType } from "../../../../types";
-import { getUser } from "../../../../utils/apiService";
 import dbConnect from "../../../../utils/dbConnect";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 type Data = {
   message: string;
@@ -24,7 +27,14 @@ export default async function handler(
     description,
     appointmentStatus,
   }: AppointmentType = req.body;
-  if (!doctorId || !patientId || !date || !description || !appointmentStatus || !time)
+  if (
+    !doctorId ||
+    !patientId ||
+    !date ||
+    !description ||
+    !appointmentStatus ||
+    !time
+  )
     return res.status(400).json({ message: "Invalid request body" });
 
   await dbConnect();
@@ -42,11 +52,24 @@ export default async function handler(
       appointmentStatus,
     });
     //sending request emails
-    const patient: UserType = await User.findOne({ userId: patientId }).exec()
-    const doctor: UserType = await User.findOne({ userId: doctorId }).exec()
-    await sendAppointmentRequestEmail(patient?.email,patient?.firstName,`${doctor?.firstName} ${doctor?.lastName}`,date,time);
-    await sendDoctorRequestEmail(doctor?.email,doctor?.lastName, `${patient?.firstName} ${patient?.lastName}`,date,time,description)
-    
+    const patient: UserType = await User.findOne({ userId: patientId }).exec();
+    const doctor: UserType = await User.findOne({ userId: doctorId }).exec();
+    await sendAppointmentRequestEmail(
+      patient?.email,
+      patient?.firstName,
+      `${doctor?.firstName} ${doctor?.lastName}`,
+      dayjs(new Date(date)).format("MMMM D, YYYY"),
+      dayjs(time, "HH:mm").format("h:mm a")
+    );
+    await sendDoctorRequestEmail(
+      doctor?.email,
+      doctor?.lastName,
+      `${patient?.firstName} ${patient?.lastName}`,
+      dayjs(new Date(date)).format("MMMM D, YYYY"),
+      dayjs(time, "HH:mm").format("h:mm a"),
+      description
+    );
+
     res.status(200).json({ message: "Appointment successfully created" });
   } catch (e) {
     console.log(`Create Appointment Error: ${e}`);

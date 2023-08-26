@@ -5,15 +5,16 @@ import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { UserType } from "../types";
+import { Heading } from "@chakra-ui/react";
 
 interface NavbarProps {
   pageSession: UserType;
 }
 
-const NavBar = (props: NavbarProps) => {
+const NavBar = ({ pageSession }: NavbarProps) => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
-    props?.pageSession ? true : false
+    pageSession ? true : false
   );
 
   async function handleSignOut() {
@@ -25,7 +26,7 @@ const NavBar = (props: NavbarProps) => {
     <Navbar bg="dark" variant="dark" expand="md">
       <Container>
         <Navbar.Brand onClick={() => router.push("/")}>
-          Appointment App
+          <Heading size="md">Appointment App</Heading>
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="navbar-links" />
@@ -33,22 +34,22 @@ const NavBar = (props: NavbarProps) => {
         <Navbar.Collapse className="justify-content-end" id="navbar-links">
           <Nav>
             {isLoggedIn ? (
-              props?.pageSession?.role === "Doctor" ? (
+              pageSession?.role === "Doctor" ? (
                 <>
                   <Nav.Link
                     className="m-3 text-white"
                     onClick={() => router.push("/doctor")}
                   >
-                    Home
+                    <Heading size="sm">Home</Heading>
                   </Nav.Link>
                   <Nav.Link
                     className="m-3 text-white"
                     onClick={() => router.push("/doctor/appointments")}
                   >
-                    View Appointments
+                    <Heading size="sm">View Appointments</Heading>
                   </Nav.Link>
                   <Nav.Link className="m-3 text-white" onClick={handleSignOut}>
-                    Sign Out
+                    <Heading size="sm">Sign Out</Heading>
                   </Nav.Link>
                 </>
               ) : (
@@ -57,22 +58,16 @@ const NavBar = (props: NavbarProps) => {
                     className="m-3 text-white"
                     onClick={() => router.push("/")}
                   >
-                    Home
-                  </Nav.Link>
-                  <Nav.Link
-                    className="m-3 text-white"
-                    onClick={() => router.push("/book")}
-                  >
-                    Add Appointment
+                    <Heading size="sm">Home</Heading>
                   </Nav.Link>
                   <Nav.Link
                     className="m-3 text-white"
                     onClick={() => router.push("/profile")}
                   >
-                    View Profile
+                    <Heading size="sm">Profile</Heading>
                   </Nav.Link>
                   <Nav.Link className="m-3 text-white" onClick={handleSignOut}>
-                    Sign Out
+                    <Heading size="sm">Sign Out</Heading>
                   </Nav.Link>
                 </>
               )
@@ -82,13 +77,13 @@ const NavBar = (props: NavbarProps) => {
                   className="m-3 text-white"
                   onClick={() => router.push("/login")}
                 >
-                  Login
+                  <Heading size="sm">Login</Heading>
                 </Nav.Link>
                 <Nav.Link
                   className="m-3 text-white"
                   onClick={() => router.push("/signup")}
                 >
-                  Register
+                  <Heading size="sm">Register</Heading>
                 </Nav.Link>
               </>
             )}

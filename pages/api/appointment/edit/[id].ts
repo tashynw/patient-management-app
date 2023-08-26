@@ -5,6 +5,10 @@ import User from "../../../../models/User";
 import { UserType } from "../../../../types";
 import { getUser } from "../../../../utils/apiService";
 import dbConnect from "../../../../utils/dbConnect";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 type Data = {
   name?: string;
@@ -31,9 +35,20 @@ export default async function handler(
     if (!response.acknowledged)
       return res.status(400).json({ message: "Error editing appointment" });
     //sending result email
-    const patient: UserType = await User.findOne({ userId: appointment?.patientId }).exec()
-    const doctor: UserType = await User.findOne({ userId: appointment?.doctorId }).exec()
-    await sendAppointmentResultEmail(patient?.email,patient?.firstName,`${doctor?.firstName} ${doctor?.lastName}`,appointment?.date,appointment?.time,appointmentStatus)
+    const patient: UserType = await User.findOne({
+      userId: appointment?.patientId,
+    }).exec();
+    const doctor: UserType = await User.findOne({
+      userId: appointment?.doctorId,
+    }).exec();
+    await sendAppointmentResultEmail(
+      patient?.email,
+      patient?.firstName,
+      `${doctor?.firstName} ${doctor?.lastName}`,
+      dayjs(new Date(appointment?.date)).format("MMMM D, YYYY"),
+      dayjs(appointment?.time, "HH:mm").format("h:mm a"),
+      appointmentStatus
+    );
     return res.status(200).json({ message: "Appointment edited successfully" });
   } catch (e) {
     console.log(`Delete appointment Error: ${e}`);

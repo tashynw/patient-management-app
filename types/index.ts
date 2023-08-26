@@ -36,12 +36,12 @@ export type CreateUserInput = {
   email: string;
   password: string;
   ipAddress: string;
-}
+};
 
 export type LoginUserInput = {
   email: string;
   password: string;
-}
+};
 
 export type CreateAppointmentInput = {
   doctorId: string;
@@ -49,15 +49,27 @@ export type CreateAppointmentInput = {
   date: string;
   time: string;
   description: string;
-}
+};
 
-export const AppointmentFetchQueries: { [key: string]: string; } = {
+export const AppointmentFetchQueries: { [key: string]: string } = {
   PENDING: "Pending",
   REJECTED: "Rejected",
-  ACCEPTED: "Accepted"
-}
+  ACCEPTED: "Accepted",
+};
+
+export const badgeStatusColor: { [key: string]: string } = {
+  Pending: "blue",
+  Rejected: "red",
+  Accepted: "green",
+};
 
 export type FetchAppointmentInput = {
   patientId: string;
   appointmentStatus: string;
-}
+};
+
+export type EditUserProfileForm = {
+  age: string;
+  phoneNumber: string;
+  address: string;
+};

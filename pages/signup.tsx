@@ -2,12 +2,35 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import React, { useState } from "react";
 import NavBar from "../components/navbar";
-import { createDoctor, createUser, getIpAddress, getUserFromEmail } from "../utils/apiService";
+import {
+  createDoctor,
+  createUser,
+  getIpAddress,
+  getUserFromEmail,
+} from "../utils/apiService";
 import { useRouter } from "next/router";
-import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { UserType } from "../types";
-import { toast } from "react-toastify";
+import {
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+  VStack,
+  Text,
+  useToast,
+  InputGroup,
+  InputRightElement,
+  Checkbox,
+} from "@chakra-ui/react";
+import { SignupForm, SignupFormSchema } from "../types/Authentication";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { getServerSession } from "next-auth/next";
 
 interface SignUpPageProps {
   pageSession: UserType;
@@ -15,72 +38,104 @@ interface SignUpPageProps {
 
 export default function SignUpPage(props: SignUpPageProps) {
   const router = useRouter();
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
-  const [matchPasswordRegex, setMatchPasswordRegex] = useState<boolean>(true);
+  const toast = useToast();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
   const [isDoctor, setIsDoctor] = useState<boolean>(false);
-  const [doctorPassword, setDoctorPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const handleSignUpForm = async (e: React.FormEvent<HTMLFormElement>) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<SignupForm>();
+  const submitSignUp = handleSubmit(async (values) => {
     try {
-      e.preventDefault();
       setIsLoading(true);
-      if (password != confirmPassword) {
+      const currentUser = await getUserFromEmail(values.email).catch((e) => {});
+      if (currentUser) {
         setIsLoading(false);
-        return setPasswordMismatch(true);
-      }
-      if (
-        !new RegExp("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").test(
-          password
-        )
-      ) {
-        setIsLoading(false);
-        return setMatchPasswordRegex(false);
-      }
-
-      const currentUser = await getUserFromEmail(email).catch((e)=>{});
-      if(currentUser){
-        setIsLoading(false);
-        return toast.error("Email already taken - try again");
+        return toast({
+          title: `Email already taken`,
+          status: "error",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
       }
 
       const ipAddress: string = await getIpAddress();
       if (isDoctor) {
-        const passCode: string = process.env.NEXT_PUBLIC_DOCTOR_CODE || '';
-        if (doctorPassword != passCode) {
-          setIsLoading(false);
-          return toast.error("Incorrect doctor code");
-        }
-        await createDoctor({ firstName, lastName, email, password, ipAddress });
+        await createDoctor({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+          ipAddress,
+        });
         const loginStatus = await signIn("credentials", {
-          email,
-          password,
+          email: values.email,
+          password: values.password,
           redirect: false,
         });
-        if (!loginStatus?.ok) return toast.error("Sign in failed");
+        if (!loginStatus?.ok) {
+          return toast({
+            title: `Login Failed`,
+            status: "error",
+            duration: 5000,
+            position: "top-right",
+            isClosable: true,
+          });
+        }
         setIsLoading(false);
-        toast.success("Account created successfully");
+        toast({
+          title: `Sign up Successful`,
+          description: `Account created successfully`,
+          status: "success",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
         return router.push("/doctor");
       }
-      await createUser({ firstName, lastName, email, password, ipAddress });
+      await createUser({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+        ipAddress,
+      });
       const loginStatus = await signIn("credentials", {
-        email,
-        password,
+        email: values.email,
+        password: values.password,
         redirect: false,
       });
-      if (!loginStatus?.ok) return toast.error("Sign in failed");
+      if (!loginStatus?.ok) {
+        return toast({
+          title: `Login Failed`,
+          status: "error",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+      }
+
       setIsLoading(false);
-      toast.success("Account created successfully");
+      toast({
+        title: `Sign up Successful`,
+        description: `Account created successfully`,
+        status: "success",
+        duration: 5000,
+        position: "top-right",
+        isClosable: true,
+      });
       router.push("/");
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      setIsLoading(false);
     }
-  };
+  });
+
   return (
     <div
       className="bg-image"
@@ -102,139 +157,192 @@ export default function SignUpPage(props: SignUpPageProps) {
               Sign up now and start booking your appointments online
             </h4>
             <br />
-            <button className="btn btn-primary btn-lg text-white rounded-5">
-              Set Appointment today
-            </button>
           </div>
 
-          <div className="w-20 p-4 bg-white rounded-3">
-            <h4 className="text-center">Sign Up</h4>
-            <br />
-            <form onSubmit={handleSignUpForm}>
-              <div className="form-group">
-                <label>First Name</label>
-                <input
-                  type="text"
-                  className="form-control mt-2"
-                  placeholder="Enter First Name"
-                  required
-                  onChange={(e) => setFirstName(e.target.value)}
+          <VStack borderRadius={8} bg="white" gap={5} p={5}>
+            <Heading size="md">Sign Up</Heading>
+            <HStack flexDir={["column", "column", "row"]} gap={3} w="100%">
+              <FormControl isRequired isInvalid={errors?.firstName != null}>
+                <FormLabel>First Name</FormLabel>
+                <Input
+                  {...register("firstName", {
+                    required: {
+                      value: true,
+                      message: `Field is required`,
+                    },
+                  })}
                 />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Last Name</label>
-                <input
-                  type="text"
-                  className="form-control mt-2"
-                  placeholder="Enter Last Name"
-                  required
-                  onChange={(e) => setLastName(e.target.value)}
+                <FormErrorMessage>
+                  {errors?.firstName && errors?.firstName?.message}
+                </FormErrorMessage>
+              </FormControl>
+              <FormControl isRequired isInvalid={errors?.lastName != null}>
+                <FormLabel>Last Name</FormLabel>
+                <Input
+                  type="lastName"
+                  {...register("lastName", {
+                    required: {
+                      value: true,
+                      message: `Field is required`,
+                    },
+                  })}
                 />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Email Address</label>
-                <input
-                  type="email"
-                  className="form-control mt-2"
-                  placeholder="Enter email"
-                  required
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  className={
-                    matchPasswordRegex
-                      ? "form-control mt-2"
-                      : "form-control mt-2 is-invalid"
-                  }
-                  placeholder="Enter password"
-                  required
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {!matchPasswordRegex && (
-                  <div className="invalid-feedback">
-                    Minimum of eight characters, at least one letter, number and
-                    special character.
-                  </div>
-                )}
-              </div>
-              <br />
-              <div className="form-group">
-                <label>Confirm Password</label>
-                <input
-                  type="password"
-                  className={
-                    !passwordMismatch
-                      ? "form-control mt-2"
-                      : "form-control mt-2 is-invalid"
-                  }
-                  placeholder="Confirm password"
-                  required
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-                {passwordMismatch && (
-                  <div className="invalid-feedback">
-                    The password does not match.
-                  </div>
-                )}
-              </div>
-              <br />
-              {isDoctor && (
-                <div className="form-group">
-                  <label>Enter Doctor's code</label>
-                  <input
-                    type="password"
-                    className="form-control mt-2"
+                <FormErrorMessage>
+                  {errors?.lastName && errors?.lastName?.message}
+                </FormErrorMessage>
+              </FormControl>
+            </HStack>
+            <FormControl
+              isRequired
+              id="email"
+              isInvalid={errors?.email != null}
+            >
+              <FormLabel>Email Address</FormLabel>
+              <Input
+                {...register("email", {
+                  required: {
+                    value: true,
+                    message: `Field is required`,
+                  },
+                  pattern: {
+                    value:
+                      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                    message: "Email is invalid",
+                  },
+                })}
+              />
+              <FormErrorMessage>
+                {errors?.email && errors?.email?.message}
+              </FormErrorMessage>
+            </FormControl>
+            <HStack flexDir={["column", "column", "row"]} gap={3} w="100%">
+              <FormControl isRequired isInvalid={errors?.password != null}>
+                <FormLabel>Password</FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? `text` : `password`}
                     placeholder="Enter password"
-                    required
-                    onChange={(e) => setDoctorPassword(e.target.value)}
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: `Field is required`,
+                      },
+                      validate: (value) => {
+                        if (value != getValues("confirmPassword")) {
+                          return "Passwords must match";
+                        }
+                      },
+                      maxLength: {
+                        value: 50,
+                        message: `Password too long`,
+                      },
+                      pattern: {
+                        value:
+                          /^(?=\S*[a-z])(?=\S*[A-Z])(?=\S*\d)(?=\S*[^\w\s])\S{8,}$/,
+                        message:
+                          "Password should be minimum eight characters, at least one uppercase letter, one lowercase letter and one number",
+                      },
+                    })}
                   />
-                </div>
-              )}
-              <br />
-              <div className="form-check">
-                <label className="form-check-label">
-                  Are you a Doctor?
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={isDoctor}
-                    onChange={() => setIsDoctor(!isDoctor)}
+                  <InputRightElement
+                    onClick={() => setShowPassword(!showPassword)}
+                    children={
+                      showPassword ? (
+                        <ViewOffIcon fontSize={20} color="blue.700" />
+                      ) : (
+                        <ViewIcon fontSize={20} color="blue.700" />
+                      )
+                    }
                   />
-                </label>
-              </div>
-              <br />
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-lg text-white"
-                >
-                  Start Today!{" "}
-                  {isLoading && (
-                    <div
-                      className="spinner-border text-white spinner-border-sm"
-                      role="status"
-                    ></div>
-                  )}
-                </button>
-              </div>
-            </form>
-            <br />
-            <div className="text-center">
-              <Link
-                href="/login"
-                style={{ textDecoration: "none", color: "inherit" }}
+                </InputGroup>
+                <FormErrorMessage>
+                  {errors?.password && errors?.password?.message}
+                </FormErrorMessage>
+              </FormControl>
+              <FormControl
+                isRequired
+                isInvalid={errors?.confirmPassword != null}
               >
-                <strong>Already have an account? Login</strong>
-              </Link>
-            </div>
-          </div>
+                <FormLabel>Confirm Password</FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showConfirmPassword ? `text` : `password`}
+                    {...register("confirmPassword", {
+                      required: {
+                        value: true,
+                        message: `Field is required`,
+                      },
+                      validate: (value) => {
+                        if (value != getValues("password")) {
+                          return "Passwords must match";
+                        }
+                      },
+                    })}
+                  />
+                  <InputRightElement
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    children={
+                      showConfirmPassword ? (
+                        <ViewOffIcon fontSize={20} color="blue.700" />
+                      ) : (
+                        <ViewIcon fontSize={20} color="blue.700" />
+                      )
+                    }
+                  />
+                </InputGroup>
+                <FormErrorMessage>
+                  {errors?.confirmPassword && errors?.confirmPassword?.message}
+                </FormErrorMessage>
+              </FormControl>
+            </HStack>
+            <VStack w="100%" alignItems="flex-start">
+              {isDoctor && (
+                <FormControl isInvalid={errors?.doctorCode != null}>
+                  <FormLabel>Doctor Code</FormLabel>
+                  <Input
+                    {...register("doctorCode", {
+                      validate: (value) => {
+                        if (!isDoctor) return undefined;
+
+                        if (value != process.env.NEXT_PUBLIC_DOCTOR_CODE) {
+                          return "Incorrect doctor code";
+                        }
+                      },
+                    })}
+                  />
+                  <FormErrorMessage>
+                    {errors?.doctorCode && errors?.doctorCode?.message}
+                  </FormErrorMessage>
+                </FormControl>
+              )}
+              <Checkbox onChange={() => setIsDoctor(!isDoctor)}>
+                Are you a doctor?
+              </Checkbox>
+            </VStack>
+
+            <Button
+              bg={"blue.800"}
+              color={"white"}
+              mt={4}
+              _hover={{
+                bg: "blue.900",
+              }}
+              isLoading={isLoading}
+              onClick={() => {
+                submitSignUp();
+              }}
+              w={"100%"}
+            >
+              Sign up
+            </Button>
+
+            <Text size={"sm"}>
+              Already have an account?{" "}
+              <Text as="span" size={"sm"} color={"blue.700"}>
+                <Link href={"/login"}>Login</Link>
+              </Text>
+            </Text>
+          </VStack>
         </div>
       </div>
     </div>
@@ -242,7 +350,7 @@ export default function SignUpPage(props: SignUpPageProps) {
 }
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions

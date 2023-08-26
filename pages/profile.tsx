@@ -1,12 +1,35 @@
-import { unstable_getServerSession } from "next-auth";
 import { getSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import NavBar from "../components/navbar";
-import { UserType } from "../types";
+import { EditUserProfileForm, UserType } from "../types";
 import { deleteUser, updateUser } from "../utils/apiService";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { getServerSession } from "next-auth/next";
+import InputMask from "react-input-mask";
+import { useForm } from "react-hook-form";
+import {
+  Avatar,
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  Text,
+  Textarea,
+  VStack,
+  useToast,
+} from "@chakra-ui/react";
+import { useMutation } from "react-query";
 
 interface ProfilePageProps {
   pageSession: UserType;
@@ -14,138 +37,216 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ pageSession }: ProfilePageProps) {
   const router = useRouter();
-  const [age, setAge] = useState<string>(pageSession?.age?.toString() || "");
-  const [phoneNumber, setPhoneNumber] = useState<string>(
-    pageSession?.phoneNumber || ""
-  );
-  const [address, setAddress] = useState<string>(pageSession?.address || "");
-  const [disable, setDisable] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const toast = useToast();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<EditUserProfileForm>();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    await updateUser(pageSession?.userId, parseInt(age), phoneNumber, address);
-    setDisable(true);
-  }
+  useEffect(() => {
+    setValue("age", pageSession?.age! as any);
+    setValue("address", pageSession?.address!);
+    setValue("phoneNumber", pageSession?.phoneNumber!);
+  }, [pageSession]);
 
-  async function deleteUserFunction() {
-    if (confirm("Are you sure you want to delete your account?")) {
-      setIsLoading(true);
-      if (!pageSession?.userId) return;
-      const response = await deleteUser(pageSession?.userId);
-      if (!response) return toast.error("Account and appointments failed to delete");
-      setIsLoading(false);
-      signOut();
-      toast.success("Account and appointments successfully deleted");
-      router.push("/login");
+  const { mutate: updateMutate, isLoading: isUpdateLoading } = useMutation(
+    (values: EditUserProfileForm) =>
+      updateUser(
+        pageSession?.userId,
+        parseInt(values?.age),
+        values?.phoneNumber,
+        values?.address
+      ),
+    {
+      onSuccess() {
+        toast({
+          title: `Profile Updated`,
+          description: `Your profile has been successfully updated.`,
+          status: "success",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+      },
+      onError() {
+        toast({
+          description:
+            "An error occurred while editing your profile. Try again later.",
+          status: "error",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+      },
     }
-  }
+  );
+
+  const { mutate: deleteMutate, isLoading: isDeleteLoading } = useMutation(
+    () => deleteUser(pageSession?.userId),
+    {
+      onSuccess(data, variables, context) {
+        toast({
+          title: `Profile Deleted`,
+          description: `Your profile has been successfully deleted.`,
+          status: "success",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+        signOut();
+        router.push("/login");
+      },
+      onError() {
+        toast({
+          description:
+            "An error occurred while deleting your profile. Try again later.",
+          status: "error",
+          duration: 5000,
+          position: "top-right",
+          isClosable: true,
+        });
+      },
+    }
+  );
+
+  const onSubmit = handleSubmit((values) => {
+    updateMutate(values);
+  });
 
   return (
     <>
       <NavBar pageSession={pageSession} />
       <div className="container">
-        <div className="h-100 d-flex justify-content-between align-items-center mt-5">
-          <h2>Profile</h2>
-        </div>
-        <br />
-        <br />
-        <form onSubmit={handleSubmit}>
-          <div className="form-group w-25">
-            <div
-              className="input-group d-flex align-items-center"
-              style={{ gap: "10px" }}
-            >
-              <label>Age</label>
-              <input
-                type="number"
-                min={10}
-                max={100}
-                className="form-control"
-                disabled={disable}
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
+        <Heading mt={7} fontWeight="medium">
+          Profile
+        </Heading>
+        <VStack w="100%" alignItems="flex-start" gap={10} mt={10}>
+          <HStack gap={3} alignContent="center">
+            <Avatar
+              name={`${pageSession?.firstName} ${pageSession?.lastName}`}
+            />
+            <Heading size="sm" fontWeight={600}>
+              {`${pageSession?.firstName} ${pageSession?.lastName}`}
+            </Heading>
+          </HStack>
+          <VStack gap={10} alignItems="flex-start">
+            <HStack gap={5}>
+              <FormControl isRequired isInvalid={errors?.age != null}>
+                <FormLabel>Age</FormLabel>
+                <NumberInput max={100} min={5}>
+                  <NumberInputField
+                    {...register("age", {
+                      min: {
+                        value: 5,
+                        message: "Age should be above 5",
+                      },
+                    })}
+                  />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+                <FormErrorMessage>
+                  {errors?.age && errors?.age?.message}
+                </FormErrorMessage>
+              </FormControl>
+              <FormControl isRequired isInvalid={errors?.phoneNumber != null}>
+                <FormLabel>Phone Number</FormLabel>
+                <Input
+                  as={InputMask as any}
+                  mask={"***-***-****"}
+                  maskChar={null}
+                  onKeyPress={(event) => {
+                    if (!/[0-9]/.test(event.key)) {
+                      event.preventDefault();
+                    }
+                  }}
+                  {...register("phoneNumber", {
+                    required: {
+                      value: true,
+                      message: "Field is required",
+                    },
+                    minLength: {
+                      value: 12,
+                      message: "Phone number too short",
+                    },
+                    maxLength: {
+                      value: 12,
+                      message: "Phone number too short",
+                    },
+                  })}
+                  id="phone"
+                  inputMode="numeric"
+                  type="tel"
+                />
+                <FormErrorMessage>
+                  {errors?.phoneNumber && errors?.phoneNumber?.message}
+                </FormErrorMessage>
+              </FormControl>
+            </HStack>
+
+            <FormControl isRequired isInvalid={errors?.address != null}>
+              <FormLabel>Address</FormLabel>
+              <Textarea
+                {...register("address", {
+                  required: {
+                    value: true,
+                    message: "Field is required",
+                  },
+                  minLength: {
+                    value: 6,
+                    message: "Address too short",
+                  },
+                  maxLength: {
+                    value: 250,
+                    message: "Address too long",
+                  },
+                })}
               />
-            </div>
-          </div>
-          <br />
-          <div className="form-group w-25">
-            <div
-              className="input-group d-flex align-items-center"
-              style={{ gap: "10px" }}
-            >
-              <label>Phone Number</label>
-              <input
-                type="text"
-                className="form-control"
-                minLength={7}
-                maxLength={15}
-                disabled={disable}
-                value={phoneNumber}
-                pattern="[0-9]{7,10}"
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
-            </div>
-          </div>
-          <br />
-          <br />
-          <div className="form-group">
-            <label>Address</label>
-            <textarea
-              className="form-control mt-3"
-              required
-              minLength={10}
-              style={{ height: "80px" }}
-              disabled={disable}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            ></textarea>
-          </div>
-          <br />
-          <br />
-          {disable ? (
-            <button
-              className="btn btn-primary text-white"
-              onClick={() => setDisable(false)}
-            >
-              Edit
-            </button>
-          ) : (
-            <>
-              <br />
-              <button
-                type="submit"
-                className="btn btn-primary text-white"
-                onClick={() => setDisable(false)}
+              <FormErrorMessage>
+                {errors?.address && errors?.address?.message}
+              </FormErrorMessage>
+            </FormControl>
+            <HStack gap={5} mt={5}>
+              <Button
+                size="md"
+                bg="blue.800"
+                color="white"
+                _hover={{
+                  bg: "blue.900",
+                }}
+                isLoading={isUpdateLoading}
+                onClick={onSubmit}
               >
-                Submit
-              </button>
-            </>
-          )}
-        </form>
-        <br />
-        <br />
-        <h2 className="mt-5">Manage Profile</h2>
-        <br />
-        <button
-          className="btn btn-danger btn-lg text-white"
-          onClick={() => deleteUserFunction()}
-        >
-          Delete my account{" "}
-          {isLoading && (
-            <div
-              className="spinner-border text-white spinner-border-sm"
-              role="status"
-            ></div>
-          )}
-        </button>
+                Save
+              </Button>
+              <Button
+                size="md"
+                colorScheme="red"
+                isLoading={isDeleteLoading}
+                onClick={() => {
+                  if (
+                    confirm("Are you sure you want to delete your account?")
+                  ) {
+                    deleteMutate();
+                  }
+                }}
+              >
+                Delete Account
+              </Button>
+            </HStack>
+          </VStack>
+        </VStack>
       </div>
     </>
   );
 }
 
 export async function getServerSideProps(context: any) {
-  const session: any = await unstable_getServerSession(
+  const session: any = await getServerSession(
     context.req,
     context.res,
     authOptions

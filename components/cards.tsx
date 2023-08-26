@@ -1,51 +1,111 @@
 import { useRouter } from "next/router";
 import React from "react";
-import { HiOutlineUsers } from "react-icons/hi";
-import { AppointmentType, UserType } from "../types/index";
+import NextLink from "next/link";
+import { AppointmentType, UserType, badgeStatusColor } from "../types/index";
+import {
+  Box,
+  Heading,
+  SimpleGrid,
+  VStack,
+  Text,
+  Divider,
+  HStack,
+  Avatar,
+  Badge,
+  Link,
+  Spacer,
+} from "@chakra-ui/react";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 interface CardProps {
   cards: AppointmentType[];
   pageSession: UserType;
+  setSelectedAppointment: any;
+  onViewAppointmentOpen: any;
 }
 
 const Cards: React.FC<CardProps> = (props: CardProps) => {
-  const router = useRouter();
   return (
-    <div className="row mt-4 justify-content-start">
+    <SimpleGrid w="100%" gap={5} spacing={5} columns={[1, 2, 3]}>
       {props?.cards?.map((card) => (
-        <div
-          className="appointment-card"
-          style={{ cursor: "pointer" }}
+        <Box
+          bg="white"
+          borderRadius={10}
+          p={5}
+          w="100%"
           key={card?.appointmentId}
-          onClick={() => router.push(`/appointment/${card?.appointmentId}`)}
+          boxShadow="lg"
         >
-          <div className="card-header">
-            <div className="icon-container">
-              <HiOutlineUsers size={25} color="#23A6F0" />
-            </div>
+          <Badge colorScheme={badgeStatusColor[card?.appointmentStatus]}>
+            {card?.appointmentStatus}
+          </Badge>
+
+          <VStack w="100%" alignItems="flex-start" mt={4}>
+            <Text
+              fontSize="16px"
+              fontWeight={500}
+              noOfLines={1}
+              cursor="pointer"
+              onClick={() => {
+                props?.setSelectedAppointment(card);
+                props?.onViewAppointmentOpen();
+              }}
+            >
+              {card?.description}
+            </Text>
+            <Text
+              fontSize="14px"
+              color="gray.600"
+              noOfLines={1}
+              fontWeight={500}
+            >
+              Date: {dayjs(new Date(card?.date)).format("MMMM D, YYYY")}
+            </Text>
+            <Text
+              fontSize="14px"
+              color="gray.600"
+              noOfLines={1}
+              fontWeight={500}
+            >
+              Time: {dayjs(card?.time, "HH:mm").format("h:mm a")}
+            </Text>
+          </VStack>
+
+          <Divider />
+
+          <VStack gap={1} w="100" alignItems="flex-start">
             {props?.pageSession?.role == "Patient" ? (
-              <p>Dr. {card.doctorId}</p>
+              <>
+                <Heading size="sm" fontWeight={500} color="gray.600">
+                  Doctor
+                </Heading>
+                <HStack w="100%">
+                  <Avatar size="sm" name={card?.doctorId} />
+                  <Heading size="sm" fontWeight={500}>
+                    Dr. {card?.doctorId}
+                  </Heading>
+                </HStack>
+              </>
             ) : (
-              <p>{card.patientId}</p>
+              <>
+                <Heading size="sm" fontWeight={500} color="gray.600">
+                  Patient
+                </Heading>
+                <HStack w="100%">
+                  <Avatar size="sm" name={card?.patientId} />
+                  <Heading size="sm" fontWeight={500}>
+                    {card?.patientId}
+                  </Heading>
+                </HStack>
+              </>
             )}
-          </div>
-          <div className="card-description">
-            <p className="text-muted">
-              <strong>Date: {card?.date}</strong>
-            </p>
-            <p className="text-muted">
-              <strong>Time: {card?.time}</strong>
-            </p>
-            <p className="text-muted description-text">
-              <strong>{card?.description}</strong>
-            </p>
-            <p className="text-primary">
-              <strong>Status: {card?.appointmentStatus}</strong>
-            </p>
-          </div>
-        </div>
+          </VStack>
+        </Box>
       ))}
-    </div>
+    </SimpleGrid>
   );
 };
 

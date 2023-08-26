@@ -7,7 +7,10 @@ import {
 } from "../types";
 
 const stage = process.env.NEXT_PUBLIC_STAGE || "";
-const HOST_NAME: string = (stage=="dev") ? "http://localhost:3000" : "https://patient-appointment-app.netlify.app";
+const HOST_NAME: string =
+  stage == "dev"
+    ? "http://localhost:3000"
+    : "https://patient-appointment-app.netlify.app";
 
 export async function createUser(input: CreateUserInput): Promise<boolean> {
   try {
@@ -75,7 +78,7 @@ export async function getUserFromEmail(email: string): Promise<UserType> {
     const request = await fetch(`${HOST_NAME}/api/user/get`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     const user = await request.json();
@@ -87,7 +90,9 @@ export async function getUserFromEmail(email: string): Promise<UserType> {
   }
 }
 
-export async function getPatientsWithFirstName(firstName: string): Promise<UserType[]> {
+export async function getPatientsWithFirstName(
+  firstName: string
+): Promise<UserType[]> {
   try {
     const requestBody = { query: firstName };
     const request: Response = await fetch(`${HOST_NAME}/api/user/fetch`, {
@@ -128,10 +133,13 @@ export async function getAppointment(
   appointmentId: string
 ): Promise<AppointmentType> {
   try {
-    const request = await fetch(`${HOST_NAME}/api/appointment/${appointmentId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    const request = await fetch(
+      `${HOST_NAME}/api/appointment/${appointmentId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     const appointment = await request.json();
     return appointment.body;
@@ -343,7 +351,12 @@ export async function getAllPatients(): Promise<UserType[]> {
   }
 }
 
-export async function updateUser(userId: string,age: number, phoneNumber: string, address: string): Promise<boolean>{
+export async function updateUser(
+  userId: string,
+  age: number,
+  phoneNumber: string,
+  address: string
+): Promise<boolean> {
   try {
     const requestBody = { age, phoneNumber, address };
     const request: Response = await fetch(
@@ -361,7 +374,7 @@ export async function updateUser(userId: string,age: number, phoneNumber: string
   }
 }
 
-export async function deleteUser(userId: string): Promise<boolean>{
+export async function deleteUser(userId: string): Promise<boolean> {
   try {
     const request: Response = await fetch(
       `${HOST_NAME}/api/user/delete/${userId}`,
@@ -372,7 +385,7 @@ export async function deleteUser(userId: string): Promise<boolean>{
     );
 
     const appointments: AppointmentType[] = await getAllAppointments(userId);
-    for(let appointment of appointments){
+    for (let appointment of appointments) {
       await fetch(
         `${HOST_NAME}/api/appointment/delete/${appointment?.appointmentId}`,
         {
@@ -388,8 +401,53 @@ export async function deleteUser(userId: string): Promise<boolean>{
   }
 }
 
-export async function getIpAddress():Promise<string>{
+export async function getIpAddress(): Promise<string> {
   const res = await fetch("https://geolocation-db.com/json/");
   const json = await res.json();
   return json.IPv4;
-};
+}
+
+export async function getPatientAppointments(patientId: string) {
+  const request = await fetch(
+    `${HOST_NAME}/api/appointment/patient?patientId=${patientId}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const appointments = await request.json();
+  return appointments as {
+    acceptedCards: AppointmentType[];
+    pendingCards: AppointmentType[];
+    rejectedCards: AppointmentType[];
+  };
+}
+export async function getDoctorAppointments(doctorId: string) {
+  const request = await fetch(
+    `${HOST_NAME}/api/appointment/doctor?doctorId=${doctorId}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const appointments = await request.json();
+  return appointments as {
+    acceptedCards: AppointmentType[];
+    pendingCards: AppointmentType[];
+    rejectedCards: AppointmentType[];
+  };
+}
+
+export async function getAllAppointmentsInSystem() {
+  const request = await fetch(`${HOST_NAME}/api/appointment/all`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!request.ok)
+    throw new Error("An error occurred while fetching the appointments");
+
+  const appointments = await request.json();
+  return appointments as AppointmentType[];
+}
