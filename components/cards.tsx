@@ -15,7 +15,10 @@ import {
   Link,
   Spacer,
 } from "@chakra-ui/react";
-import { ExternalLinkIcon } from "@chakra-ui/icons";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 interface CardProps {
   cards: AppointmentType[];
@@ -53,11 +56,21 @@ const Cards: React.FC<CardProps> = (props: CardProps) => {
             >
               {card?.description}
             </Text>
-            <Text fontSize="14px" color="gray.600" noOfLines={1}>
-              Date: {new Date(card?.date).toDateString()}
+            <Text
+              fontSize="14px"
+              color="gray.600"
+              noOfLines={1}
+              fontWeight={500}
+            >
+              Date: {dayjs(new Date(card?.date)).format("MMMM D, YYYY")}
             </Text>
-            <Text fontSize="14px" color="gray.600" noOfLines={1}>
-              Time: {card?.time}
+            <Text
+              fontSize="14px"
+              color="gray.600"
+              noOfLines={1}
+              fontWeight={500}
+            >
+              Time: {dayjs(card?.time, "HH:mm").format("h:mm a")}
             </Text>
           </VStack>
 

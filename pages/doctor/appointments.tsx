@@ -44,7 +44,7 @@ const DoctorAppointmentsPage = ({
           <h2>Appointments</h2>
         </div>
         <br />
-        <SkeletonText noOfLines={4} isLoaded={!isLoading}>
+        <SkeletonText noOfLines={8} isLoaded={!isLoading}>
           <Box mb={10}>
             <CardsContainer
               acceptedCards={appointments?.acceptedCards!}

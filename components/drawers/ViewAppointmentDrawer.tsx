@@ -20,6 +20,10 @@ import {
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "react-query";
 import { updateAppointment } from "../../utils/apiService";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 type Props = {
   pageSession: UserType;
@@ -111,12 +115,17 @@ const ViewAppointmentDrawer = ({
               <FormLabel>Date</FormLabel>
               <Input
                 disabled
-                value={new Date(appointment?.date).toDateString()}
+                value={dayjs(new Date(appointment?.date)).format(
+                  "MMMM D, YYYY"
+                )}
               />
             </FormControl>
             <FormControl>
               <FormLabel>Time</FormLabel>
-              <Input disabled value={appointment?.time} />
+              <Input
+                disabled
+                value={dayjs(appointment?.time, "HH:mm").format("h:mm a")}
+              />
             </FormControl>
             <FormControl>
               <FormLabel>Description</FormLabel>

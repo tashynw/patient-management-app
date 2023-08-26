@@ -19,6 +19,7 @@ import { getServerSession } from "next-auth/next";
 import { useQuery } from "react-query";
 import { getAllDoctors, getPatientAppointments } from "../utils/apiService";
 import BookAppointmentModal from "../components/modals/BookAppointmentModal";
+import dayjs from "dayjs";
 
 interface HomePageProps {
   pageSession: UserType;
@@ -63,7 +64,9 @@ export default function Home({ pageSession, doctors }: HomePageProps) {
             <Heading fontWeight="medium">
               Hello {pageSession?.firstName}!
             </Heading>
-            <Text color="gray.600">{new Date().toDateString()}</Text>
+            <Text color="gray.600">
+              {dayjs(new Date()).format("MMMM D, YYYY")}
+            </Text>
           </VStack>
           <Spacer />
           <Button
@@ -78,7 +81,7 @@ export default function Home({ pageSession, doctors }: HomePageProps) {
             Book Appointment
           </Button>
         </HStack>
-        <SkeletonText noOfLines={4} isLoaded={!isLoading}>
+        <SkeletonText noOfLines={8} isLoaded={!isLoading}>
           <Box mb={10}>
             <CardsContainer
               acceptedCards={appointments?.acceptedCards!}

@@ -14,6 +14,10 @@ import { FiSearch } from "react-icons/fi";
 import { AppointmentType } from "../../types";
 import ViewAppointmentDescription from "../drawers/ViewAppointmentDescription";
 import DataTableBase from "../DataTableBase";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 
 type Props = {};
 
@@ -85,12 +89,13 @@ const AppointmentTable = (props: Props) => {
             {
               name: `Date`,
               sortable: true,
-              selector: (row) => row?.date || `-`,
+              selector: (row) =>
+                dayjs(new Date(row?.date)).format("MMMM D, YYYY") || `-`,
             },
             {
               name: `Time`,
-              sortable: true,
-              selector: (row) => row?.time || `-`,
+              selector: (row) =>
+                dayjs(row?.time, "HH:mm").format("h:mm a") || `-`,
             },
             {
               name: `Status`,
