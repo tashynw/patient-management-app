@@ -5,6 +5,7 @@ import {
   Divider,
   Drawer,
   DrawerBody,
+  DrawerCloseButton,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -86,6 +87,7 @@ const ViewAppointmentDrawer = ({
     >
       <DrawerOverlay />
       <DrawerContent>
+        <DrawerCloseButton />
         <DrawerHeader>
           <Text
             textTransform={"capitalize"}

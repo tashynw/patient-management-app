@@ -8,6 +8,7 @@ import {
   DrawerBody,
   DrawerFooter,
   Button,
+  DrawerCloseButton,
 } from "@chakra-ui/react";
 import React from "react";
 import { AppointmentType } from "../../types";
@@ -33,6 +34,7 @@ const ViewAppointmentDescription = ({
     >
       <DrawerOverlay />
       <DrawerContent>
+        <DrawerCloseButton />
         <DrawerHeader>
           <Text
             textTransform={"capitalize"}
