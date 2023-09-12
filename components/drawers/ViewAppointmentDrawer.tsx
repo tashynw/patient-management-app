@@ -71,7 +71,7 @@ const ViewAppointmentDrawer = ({
           position: "top-right",
           isClosable: true,
         });
-        queryClient.invalidateQueries("appointments");
+        queryClient.refetchQueries("appointments");
         onClose();
       },
     }
